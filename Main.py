@@ -1,3 +1,4 @@
+import tkinter
 from tkinter import *
 
 ##################################### VARIABLES #####################################
@@ -66,16 +67,148 @@ def creerAutomate():
     # On ouvre une nouvelle fenêtre
     fenetre = Toplevel(root)
     fenetre.title("Création d'un automate")
-    fenetre.geometry("500x800")
+    fenetre.geometry("700x500")
+
+    # On crée un grid pour la fenêtre
+    fenetre.grid_columnconfigure(0, weight=1)
+    fenetre.grid_columnconfigure(1, weight=1)
+    fenetre.grid_columnconfigure(2, weight=1)
+    fenetre.grid_columnconfigure(3, weight=1)
+    for i in range(13):
+        fenetre.grid_rowconfigure(i, weight=1)
+
+    v = tkinter.StringVar()
+    v2 = tkinter.StringVar()
+
+    Canvas(fenetre, width=700, height=500, bg="lightblue").grid(row=0, column=0, rowspan=13, columnspan=4)
 
     # On insère les éléments dans la fenêtre
-    Label(fenetre, text="Nombre d'états").pack()
-    nbEtats = Entry(fenetre)
-    nbEtats.pack()
+    Label(fenetre, text="Nombre d'états", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=0, column=0,
+                                                                                               sticky=S,
+                                                                                               pady=5, columnspan=4)
+    nbEtats = Entry(fenetre, width=10, justify="center")
+    nbEtats.grid(row=1, column=0, pady=5, sticky=N, columnspan=4)
 
-    Label(fenetre, text="Etat initial").pack()
-    etatInitial = Entry(fenetre)
-    etatInitial.pack()
+    Label(fenetre, text="Alphabet (séparer les éléments par des virgules)", font=("Helvetica", 13, "bold"),
+          bg="lightblue").grid(row=2,
+                               column=0,
+                               sticky=S,
+                               pady=5, columnspan=4)
+    alphabet = Entry(fenetre, width=50, justify="center")
+    alphabet.grid(row=3, column=0, pady=5, sticky=N, columnspan=4)
+
+    Label(fenetre, text="Etats acceptants (séparer les éléments par des virgules)", font=("Helvetica", 13, "bold"),
+          bg="lightblue").grid(row=4, column=0, sticky=S, pady=5, columnspan=4)
+    etatsAcceptants = Entry(fenetre, width=50, justify="center")
+    etatsAcceptants.grid(row=5, column=0, pady=5, sticky=N, columnspan=4)
+
+    Label(fenetre, text="Automate Complet / Incomplet", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=6,
+                                                                                                             column=0,
+                                                                                                             sticky=S,
+                                                                                                             padx=5,
+                                                                                                             pady=5,
+                                                                                                             columnspan=4)
+    r3 = Radiobutton(fenetre, text="Automate complet", variable=v2, value="Complet", bg="lightblue")
+    r3.grid(row=7, column=1, sticky=N, padx=5, pady=5)
+    r4 = Radiobutton(fenetre, text="Automate incomplet", variable=v2, value="Incomplet", bg="lightblue")
+    r4.grid(row=7, column=2, sticky=N, padx=5, pady=5)
+
+    Label(fenetre, text=" ", bg="lightblue").grid(row=8, column=0, sticky=NSEW, columnspan=4)
+
+    Button(fenetre, text="Créer AFD",
+           command=lambda: creerTableauDeter(nbEtats.get(), alphabet.get(), etatsAcceptants.get(), v2.get()),
+           bg="lightseagreen").grid(row=9, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
+    Button(fenetre, text="Créer AFN",
+           command=lambda: creerTableauNonDeter(nbEtats.get(), alphabet.get(), etatsAcceptants.get(), v2.get()),
+           bg="lightseagreen").grid(row=9, column=2, sticky=NSEW, padx=5, pady=5, columnspan=2)
+
+
+def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v2):
+    Q = set(range(1, int(nbEtats) + 1))
+    sig = set(alphabet.split(","))
+    T = {}
+    Qzero = tkinter.IntVar()
+    A = set(etatsAcceptants.split(","))
+
+    # On ouvre une nouvelle fenêtre
+    fenetre = Toplevel(root)
+    fenetre.title("Création d'un automate")
+    fenetre.geometry("700x500")
+
+    n = len(Q)
+    m = len(sig)
+
+    for i in range(n + 3):
+        fenetre.grid_rowconfigure(i, weight=1)
+    for j in range(m + 2):
+        fenetre.grid_columnconfigure(j, weight=1)
+
+    canvas = Canvas(fenetre, width=700, height=500, bg="lightblue")
+    canvas.grid(row=0, column=0, rowspan=n + 3, columnspan=m + 3)
+
+    # On insère les éléments dans la fenêtre
+    Label(fenetre, text="Table de transition", font=("Helvetica", 20, ["bold", "underline"]), bg="lightblue").grid(
+        row=0, column=0,
+        sticky=NSEW, padx=5,
+        pady=5,
+        columnspan=m + 3)
+
+    # Radio buttons to choose the initial state
+    Label(fenetre, text="État initial", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=1, column=0,
+                                                                                             sticky=NSEW, padx=5,
+                                                                                             pady=5, columnspan=m + 3)
+    for i in range(1, n):
+        Radiobutton(fenetre, text=str(i), variable=Qzero, value=i).grid(row=2, column=i, sticky=NSEW, padx=5, pady=5)
+
+
+def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v2):
+    """ Q = set(range(1, int(nbEtats) + 1))
+     sig = set(alphabet.split(","))
+     T = {}
+     Qzero = None
+     A = set(etatsAcceptants.split(","))
+
+     # On ouvre une nouvelle fenêtre
+     fenetre = Toplevel(root)
+     fenetre.title("Création d'un automate")
+     fenetre.geometry("700x500")
+
+     n = len(Q)
+     m = len(sig)
+
+     for i in range(n + 3):
+         fenetre.grid_rowconfigure(i, weight=1)
+     for j in range(m + 3):
+         fenetre.grid_columnconfigure(j, weight=1)
+
+     canvas = Canvas(fenetre, width=700, height=500, bg="lightblue")
+     canvas.grid(row=0, column=0, rowspan=n + 3, columnspan=m + 3)
+
+     # On insère les éléments dans la fenêtre
+     Label(fenetre, text="Table de transition", font=("Helvetica", 20, ["bold", "underline"]), bg="lightblue").grid(
+         row=0, column=0,
+         sticky=NSEW, padx=5,
+         pady=5,
+         columnspan=m + 3)
+
+     for i in range(1, n + 2):
+         for j in range(1, m + 2):
+             if i == 1:
+                 if j == 1:
+                     Label(fenetre, text="Q \ Σ", borderwidth=1, relief="solid",
+                           font=("Helvetica", 16, "bold")).grid(row=i, column=j, sticky=NSEW)
+                 else:
+                     Label(fenetre, text=sig.pop(), borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
+                         row=i, column=j, sticky=NSEW)
+             else:
+                 if j == 1:
+                     if Qzero in A:
+                         Label(fenetre, text="Qzero", borderwidth=1, relief="solid", font=("Helvetica", 16, "bold"),
+                               bg="darkolivegreen1").grid(row=i, column=j, sticky=NSEW)
+                     else:
+                         Label(fenetre, text="Qzero", borderwidth=1, relief="solid",
+                               font=("Helvetica", 16, "bold")).grid(row=i, column=j, sticky=NSEW)
+ """
 
 
 def showChaine():
@@ -153,47 +286,61 @@ def showRuban():
     global ACTUAL_RESULT
 
     n = len(ACTUAL_PROGRESS)
-    finished = False
+    state = 1
 
     # On crée une nouvelle fenêtre
     fenetre = Toplevel(root)
     fenetre.title("Lecture en ruban")
-    fenetre.geometry(str(n * 75 + 250) + "x400")
+    fenetre.geometry(str(n * 75 + 175) + "x450")
 
-    canvas = Canvas(fenetre, width=n * 75 + 250, height=400, bg="lightblue")
+    canvas = Canvas(fenetre, width=n * 75 + 175, height=450, bg="lightblue")
     canvas.pack()
 
-    canvas.create_text((n * 75 + 250) / 2, 50, text="Lecture Ruban", font=("Helvetica", 20, ["underline", "bold"]))
-
-    canvas.create_polygon(125, 225, 100, 250, 150, 250, fill="lightgray", outline="black")
-    canvas.create_rectangle(100, 250, 150, 300, fill="lightgray", outline="black")
-    canvas.create_text(125, 275, text=ACTUAL_PROGRESS[0], font=("Helvetica", 16, "bold"))
-
-    for i in range(1, n):
-        if ACTUAL_PROGRESS[i] == 0:
-            canvas.create_polygon(50 + 75 * i, 225, 75 * i + 25, 250, 75 * i + 75, 250, fill="indianred1",
-                                  outline="black")
-            canvas.create_rectangle(75 * i + 25, 250, 75 * i + 75, 300, fill="indianred1", outline="black")
-            canvas.create_text(75 * i + 50, 275, text=ACTUAL_PROGRESS[i], font=("Helvetica", 16, "bold"))
-            finished = True
-            break
+    def drawRuban(state):
+        canvas.delete("all")
+        canvas.create_text((n * 75 + 175) / 2, 50, text="Lecture Ruban", font=("Helvetica", 20, ["underline", "bold"]))
+        buttonBack = Button(fenetre, text="←", command=lambda: drawRuban(state - 1), bg="lightseagreen",
+                            font=("Helvetica", 20, "bold"))
+        buttonBack.pack()
+        buttonBack.place(x=(n * 75 + 175) / 2 - 30, y=370)
+        buttonForward = Button(fenetre, text="→", command=lambda: drawRuban(state + 1), bg="lightseagreen",
+                               font=("Helvetica", 20, "bold"))
+        buttonForward.pack()
+        buttonForward.place(x=(n * 75 + 175) / 2 + 30, y=370)
+        if state == 1:
+            buttonBack.config(state=DISABLED)
         else:
-            canvas.create_polygon(50 + 75 * i, 225, 75 * i + 25, 250, 75 * i + 75, 250, fill="lightgray",
-                                  outline="black")
-            canvas.create_rectangle(75 * (i + 1) + 25, 250, 75 * (i + 1) + 75, 300, fill="lightgray", outline="black")
-            canvas.create_text(75 * i + 50, 275, text=ACTUAL_PROGRESS[i], font=("Helvetica", 16, "bold"))
+            buttonBack.config(state=NORMAL)
+        if state == n:
+            buttonForward.config(state=DISABLED)
+        else:
+            buttonForward.config(state=NORMAL)
+
+        canvas.create_polygon(125, 225, 100, 250, 150, 250, fill="lightgray", outline="black")
+        canvas.create_rectangle(100, 250, 150, 300, fill="lightgray", outline="black")
+        canvas.create_text(125, 275, text=ACTUAL_PROGRESS[0], font=("Helvetica", 16, "bold"))
+
+        for i in range(1, state):
+            if ACTUAL_PROGRESS[i] == 0:
+                canvas.create_polygon(50 + 75 * (i + 1), 225, 75 * (i + 1) + 25, 250, 75 * (i + 1) + 75, 250,
+                                      fill="indianred1", outline="black")
+                canvas.create_rectangle(75 * (i + 1) + 25, 250, 75 * (i + 1) + 75, 300, fill="indianred1",
+                                        outline="black")
+            elif i + 1 == n:
+                canvas.create_polygon(50 + 75 * (i + 1), 225, 75 * (i + 1) + 25, 250, 75 * (i + 1) + 75, 250,
+                                      fill="darkolivegreen1", outline="black")
+                canvas.create_rectangle(75 * (i + 1) + 25, 250, 75 * (i + 1) + 75, 300, fill="darkolivegreen1",
+                                        outline="black")
+            else:
+                canvas.create_polygon(50 + 75 * (i + 1), 225, 75 * (i + 1) + 25, 250, 75 * (i + 1) + 75, 250,
+                                  fill="lightgray", outline="black")
+                canvas.create_rectangle(75 * (i + 1) + 25, 250, 75 * (i + 1) + 75, 300, fill="lightgray", outline="black")
+            canvas.create_text(75 * (i + 1) + 50, 275, text=ACTUAL_PROGRESS[i], font=("Helvetica", 16, "bold"))
             canvas.create_rectangle(50 + 75 * i, 150, 75 * i + 125, 225, fill="lightgray", outline="black")
             canvas.create_text(75 * i + 87.5, 187.5, text=ACTUAL_WORD[i - 1], font=("Helvetica", 16, "bold"))
 
-    if ACTUAL_RESULT:
-        canvas.create_polygon(50 + 75 * n, 225, 75 * n + 25, 250, 75 * n + 75, 250, fill="darkolivegreen1",
-                              outline="black")
-        canvas.create_rectangle(75 * n + 25, 250, 75 * n + 75, 300, fill="darkolivegreen1", outline="black")
-        canvas.create_text(75 * n + 50, 275, text=ACTUAL_PROGRESS[-1], font=("Helvetica", 16, "bold"))
-    elif not finished:
-        canvas.create_polygon(50 + 75 * n, 225, 75 * n + 25, 250, 75 * n + 75, 250, fill="indianred1", outline="black")
-        canvas.create_rectangle(75 * n + 25, 250, 75 * n + 75, 300, fill="indianred1", outline="black")
-        canvas.create_text(75 * n + 50, 275, text=ACTUAL_PROGRESS[-1], font=("Helvetica", 16, "bold"))
+
+    drawRuban(state)
 
 
 def AfficherTable():
@@ -223,7 +370,6 @@ def AfficherTable():
         pady=5,
         columnspan=m + 3)
 
-    # Draw table
     for i in range(1, n + 2):
         for j in range(1, m + 2):
             if i == 1:
@@ -279,7 +425,6 @@ root.grid_rowconfigure(4, weight=1)
 # Canvas pour séparer la fenêtre en deux parties : partie gauche pour les options, partie droite pour les résultats
 
 
-
 ###### PARTIE GAUCHE ######
 Canvas(root, width=500, height=500, bg="lightblue").grid(row=0, column=0, rowspan=8, columnspan=2)
 
@@ -316,8 +461,6 @@ boutonTester.grid(row=7, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 boutonQuitter = Button(root, text="Quitter", command=root.destroy, bg="red")
 boutonQuitter.grid(row=0, column=4, sticky=NE, padx=5, pady=5)
 
-
-
 ####### PARTIE DROITE #######
 Canvas(root, width=500, height=500, bg="lightgray").grid(row=0, column=2, rowspan=8, columnspan=3)
 
@@ -336,7 +479,6 @@ boutonChaine = Button(root, text="Voir la lecture en chaîne", command=showChain
                       font=("Helvetica", 12, "bold"))
 boutonRuban = Button(root, text="Voir la lecture en ruban", command=showRuban, bg="darkgoldenrod2",
                      font=("Helvetica", 12, "bold"))
-
 
 ##################################### MAIN #####################################
 
