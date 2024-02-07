@@ -1,5 +1,6 @@
 import tkinter
 from tkinter import *
+from tkinter import ttk, messagebox
 
 ##################################### VARIABLES #####################################
 
@@ -77,8 +78,8 @@ def creerAutomate():
     for i in range(13):
         fenetre.grid_rowconfigure(i, weight=1)
 
-    v = tkinter.StringVar()
     v2 = tkinter.StringVar()
+    v2.set(None)
 
     Canvas(fenetre, width=700, height=500, bg="lightblue").grid(row=0, column=0, rowspan=13, columnspan=4)
 
@@ -124,41 +125,101 @@ def creerAutomate():
 
 
 def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v2):
+    if nbEtats and int(nbEtats) < 1:
+        messagebox.showerror("Erreur", "Le nombre d'états doit être supérieur à 0")
+        return
+
+    if not nbEtats or not alphabet or not etatsAcceptants or not v2:
+        messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides")
+        return
+
     Q = set(range(1, int(nbEtats) + 1))
-    sig = set(alphabet.split(","))
-    T = {}
-    Qzero = tkinter.IntVar()
-    A = set(etatsAcceptants.split(","))
+    sig = sorted(alphabet.split(","))
+    T = {(i, j): 1 for i in Q for j in sig} if v2 == "Complet" else {}
+    A = set([int(i) for i in etatsAcceptants.split(",")])
+    d = {}
+
+    if any(x not in Q for x in A):
+        messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états")
+        return
 
     # On ouvre une nouvelle fenêtre
     fenetre = Toplevel(root)
     fenetre.title("Création d'un automate")
-    fenetre.geometry("700x500")
+    fenetre.geometry("700x900")
 
     n = len(Q)
     m = len(sig)
 
-    for i in range(n + 3):
+    for i in range(n + 4):
         fenetre.grid_rowconfigure(i, weight=1)
-    for j in range(m + 2):
+    for j in range(m + 3):
         fenetre.grid_columnconfigure(j, weight=1)
 
-    canvas = Canvas(fenetre, width=700, height=500, bg="lightblue")
-    canvas.grid(row=0, column=0, rowspan=n + 3, columnspan=m + 3)
+    canvas = Canvas(fenetre, width=700, height=900, bg="lightblue")
+    canvas.grid(row=0, column=0, rowspan=n + 4, columnspan=m + 3)
 
     # On insère les éléments dans la fenêtre
     Label(fenetre, text="Table de transition", font=("Helvetica", 20, ["bold", "underline"]), bg="lightblue").grid(
         row=0, column=0,
-        sticky=NSEW, padx=5,
-        pady=5,
+        sticky=N, padx=5,
+        pady=10,
         columnspan=m + 3)
 
-    # Radio buttons to choose the initial state
-    Label(fenetre, text="État initial", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=1, column=0,
-                                                                                             sticky=NSEW, padx=5,
+    Label(fenetre, text="État initial", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=0, column=0,
+                                                                                             sticky=S, padx=5,
                                                                                              pady=5, columnspan=m + 3)
-    for i in range(1, n):
-        Radiobutton(fenetre, text=str(i), variable=Qzero, value=i).grid(row=2, column=i, sticky=NSEW, padx=5, pady=5)
+
+    statesList = ttk.Combobox(fenetre, values=[str(i) for i in Q], state="readonly")
+    statesList.grid(row=1, column=0, sticky=N, padx=5, pady=5, columnspan=m + 3)
+
+    for i in range(1, n + 2):
+        for j in range(1, m + 2):
+            if i == 1:
+                if j == 1:
+                    Label(fenetre, text="Q \ Σ", borderwidth=1, relief="solid",
+                          font=("Helvetica", 16, "bold")).grid(row=i + 1, column=j, sticky=NSEW)
+                else:
+                    Label(fenetre, text=sig[j - 2], borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
+                        row=i + 1, column=j, sticky=NSEW)
+            else:
+                if j == 1:
+                    if list(Q)[i - 2] in A:
+                        Label(fenetre, text=list(Q)[i - 2], borderwidth=1, relief="solid",
+                              font=("Helvetica", 16, "bold"),
+                              bg="darkolivegreen1").grid(row=i + 1, column=j, sticky=NSEW)
+                    else:
+                        Label(fenetre, text=list(Q)[i - 2], borderwidth=1, relief="solid",
+                              font=("Helvetica", 16, "bold")).grid(row=i + 1, column=j, sticky=NSEW)
+
+                else:
+                    d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])] = ttk.Combobox(fenetre, values=[str(i) for i in Q],
+                                                                                  state="readonly",
+                                                                                  justify="center",
+                                                                                  font=("Helvetica", 16))
+                    d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])].grid(row=i + 1, column=j, sticky=NSEW)
+                    if v2 == "Complet":
+                        d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])].set(1)
+
+    Button(fenetre, text="Valider", command=lambda: validerTableauDeter(Q, sig, T, statesList.get(), A, d),
+           bg="lightseagreen", font=("Helvetica", 16, "bold")).grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5,
+                                                                    columnspan=m + 3)
+
+
+def validerTableauDeter(Q, sig, T, Qzero, A, d):
+    if not Qzero:
+        messagebox.showerror("Erreur", "L'état initial n'a pas été sélectionné")
+        return
+
+    for key, value in d.items():
+        T[(int(key[0]), key[1])] = int(value.get())
+
+    automate = (Q, sig, T, int(Qzero), A)
+
+    listeAutomates["A" + str(len(listeAutomates) + 1)] = automate
+    listAutomates.insert(END, "A" + str(len(listeAutomates)))
+
+    messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
 def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v2):
@@ -406,6 +467,20 @@ def AfficherTable():
                     else:
                         Label(fenetre, text="", borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
                             row=i, column=j, sticky=NSEW)
+
+
+def complet(aut):
+    Q, sig, T, Qzero, A = aut
+
+    if len(T) < len(Q) * len(sig):
+        Q.add(len(Q) + 1)
+
+    for n in Q:
+        for l in sig:
+            if not (n, l) in T:
+                T[(n, l)] = len(Q)
+
+    return Q, sig, T, Qzero, A
 
 
 ##################################### INTERFACE #####################################
