@@ -81,7 +81,7 @@ def creerAutomate():
     v2 = tkinter.StringVar()
     v2.set(None)
 
-    Canvas(fenetre, width=700, height=500, bg="lightblue").grid(row=0, column=0, rowspan=13, columnspan=4)
+    Canvas(fenetre, width=800, height=600, bg="lightblue").grid(row=0, column=0, rowspan=13, columnspan=4, sticky=NSEW)
 
     # On insère les éléments dans la fenêtre
     Label(fenetre, text="Nombre d'états", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=0, column=0,
@@ -143,21 +143,21 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v2):
         messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états")
         return
 
+    n = len(Q)
+    m = len(sig)
+
     # On ouvre une nouvelle fenêtre
     fenetre = Toplevel(root)
     fenetre.title("Création d'un automate")
-    fenetre.geometry("700x900")
-
-    n = len(Q)
-    m = len(sig)
+    fenetre.geometry("1200x900")
 
     for i in range(n + 4):
         fenetre.grid_rowconfigure(i, weight=1)
     for j in range(m + 3):
         fenetre.grid_columnconfigure(j, weight=1)
 
-    canvas = Canvas(fenetre, width=700, height=900, bg="lightblue")
-    canvas.grid(row=0, column=0, rowspan=n + 4, columnspan=m + 3)
+    canvas = Canvas(fenetre, width=1200, height=900, bg="lightblue")
+    canvas.grid(row=0, column=0, rowspan=n + 5, columnspan=m + 3)
 
     # On insère les éléments dans la fenêtre
     Label(fenetre, text="Table de transition", font=("Helvetica", 20, ["bold", "underline"]), bg="lightblue").grid(
@@ -201,8 +201,10 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v2):
                     if v2 == "Complet":
                         d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])].set(1)
 
+    Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
+
     Button(fenetre, text="Valider", command=lambda: validerTableauDeter(Q, sig, T, statesList.get(), A, d),
-           bg="lightseagreen", font=("Helvetica", 16, "bold")).grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5,
+           bg="lightseagreen", font=("Helvetica", 16, "bold")).grid(row=n + 4, column=0, sticky=NSEW, padx=5, pady=5,
                                                                     columnspan=m + 3)
 
 
@@ -291,7 +293,8 @@ def showChaine():
     for i in range(n * 2 + 1):
         fenetre.grid_columnconfigure(i, weight=1)
 
-    Canvas(fenetre, width=1000, height=300, bg="lightblue").grid(row=0, column=0, rowspan=3, columnspan=n * 2 + 1)
+    Canvas(fenetre, width=1000, height=300, bg="lightblue").grid(row=0, column=0, rowspan=3, columnspan=n * 2 + 1,
+                                                                 sticky=NSEW)
 
     # On affiche la progression
     Label(fenetre, text="Lecture en chaîne", font=("Helvetica", 20, ["underline", "bold"]), bg="lightblue").grid(row=0,
@@ -355,7 +358,7 @@ def showRuban():
     fenetre.geometry(str(n * 75 + 175) + "x450")
 
     canvas = Canvas(fenetre, width=n * 75 + 175, height=450, bg="lightblue")
-    canvas.pack()
+    canvas.pack(sticky=NSEW)
 
     def drawRuban(state):
         canvas.delete("all")
@@ -429,7 +432,7 @@ def AfficherTable():
         fenetre.grid_columnconfigure(j, weight=1)
 
     canvas = Canvas(fenetre, width=800, height=600, bg="lightblue")
-    canvas.grid(row=0, column=0, rowspan=n + 3, columnspan=m + 3)
+    canvas.grid(row=0, column=0, rowspan=n + 3, columnspan=m + 3, sticky=NSEW)
 
     # On affiche la table de transition
     Label(fenetre, text="Table de transition", font=("Helvetica", 20, ["bold", "underline"]), bg="lightblue").grid(
@@ -508,7 +511,7 @@ root.grid_rowconfigure(4, weight=1)
 
 
 ###### PARTIE GAUCHE ######
-Canvas(root, width=500, height=500, bg="lightblue").grid(row=0, column=0, rowspan=8, columnspan=2)
+Canvas(root, width=500, height=500, bg="lightblue").grid(row=0, column=0, rowspan=8, columnspan=2, sticky=NSEW)
 
 # On crée un bouton pour créer un automate
 boutonCreer = Button(root, text="Créer un automate", bg="lightseagreen", command=creerAutomate,
@@ -544,7 +547,7 @@ boutonQuitter = Button(root, text="Quitter", command=root.destroy, bg="red")
 boutonQuitter.grid(row=0, column=4, sticky=NE, padx=5, pady=5)
 
 ####### PARTIE DROITE #######
-Canvas(root, width=500, height=500, bg="lightgray").grid(row=0, column=2, rowspan=8, columnspan=3)
+Canvas(root, width=500, height=500, bg="lightgray").grid(row=0, column=2, rowspan=8, columnspan=3, sticky=NSEW)
 
 # On crée une zone de texte pour afficher le résultat
 labelResultat = Label(root, text="Résultat de la lecture", font=("Helvetica", 16, ["bold", "underline"]),
