@@ -1,3 +1,7 @@
+# Owners : Maache Jawad, Delmas Matthias
+
+############################################################################################################
+
 import tkinter
 from tkinter import *
 from tkinter import ttk, messagebox
@@ -157,7 +161,7 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v2):
         fenetre.grid_columnconfigure(j, weight=1)
 
     canvas = Canvas(fenetre, width=1200, height=900, bg="lightblue")
-    canvas.grid(row=0, column=0, rowspan=n + 5, columnspan=m + 3)
+    canvas.grid(row=0, column=0, rowspan=n + 5, columnspan=m + 3, sticky=NSEW)
 
     # On insère les éléments dans la fenêtre
     Label(fenetre, text="Table de transition", font=("Helvetica", 20, ["bold", "underline"]), bg="lightblue").grid(
@@ -166,7 +170,7 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v2):
         pady=10,
         columnspan=m + 3)
 
-    Label(fenetre, text="État initial", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=0, column=0,
+    Label(fenetre, text="État initial", font=("Helvetica", 15, "bold"), bg="lightblue").grid(row=0, column=0,
                                                                                              sticky=S, padx=5,
                                                                                              pady=5, columnspan=m + 3)
 
@@ -227,53 +231,97 @@ def validerTableauDeter(Q, sig, T, Qzero, A, d):
 
 
 def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v2):
-    """ Q = set(range(1, int(nbEtats) + 1))
-     sig = set(alphabet.split(","))
-     T = {}
-     Qzero = None
-     A = set(etatsAcceptants.split(","))
+    if nbEtats and int(nbEtats) < 1:
+        messagebox.showerror("Erreur", "Le nombre d'états doit être supérieur à 0")
+        return
 
-     # On ouvre une nouvelle fenêtre
-     fenetre = Toplevel(root)
-     fenetre.title("Création d'un automate")
-     fenetre.geometry("700x500")
+    if not nbEtats or not alphabet or not etatsAcceptants or not v2:
+        messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides")
+        return
 
-     n = len(Q)
-     m = len(sig)
+    Q = set(range(1, int(nbEtats) + 1))
+    sig = sorted(alphabet.split(","))
+    T = {}
+    A = set([int(i) for i in etatsAcceptants.split(",")])
+    d = {}
 
-     for i in range(n + 3):
-         fenetre.grid_rowconfigure(i, weight=1)
-     for j in range(m + 3):
-         fenetre.grid_columnconfigure(j, weight=1)
+    if any(x not in Q for x in A):
+        messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états")
+        return
 
-     canvas = Canvas(fenetre, width=700, height=500, bg="lightblue")
-     canvas.grid(row=0, column=0, rowspan=n + 3, columnspan=m + 3)
+    n = len(Q)
+    m = len(sig)
 
-     # On insère les éléments dans la fenêtre
-     Label(fenetre, text="Table de transition", font=("Helvetica", 20, ["bold", "underline"]), bg="lightblue").grid(
-         row=0, column=0,
-         sticky=NSEW, padx=5,
-         pady=5,
-         columnspan=m + 3)
+    # On ouvre une nouvelle fenêtre
+    fenetre = Toplevel(root)
+    fenetre.title("Création d'un automate")
+    fenetre.geometry("1200x900")
 
-     for i in range(1, n + 2):
-         for j in range(1, m + 2):
-             if i == 1:
-                 if j == 1:
-                     Label(fenetre, text="Q \ Σ", borderwidth=1, relief="solid",
-                           font=("Helvetica", 16, "bold")).grid(row=i, column=j, sticky=NSEW)
-                 else:
-                     Label(fenetre, text=sig.pop(), borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
-                         row=i, column=j, sticky=NSEW)
-             else:
-                 if j == 1:
-                     if Qzero in A:
-                         Label(fenetre, text="Qzero", borderwidth=1, relief="solid", font=("Helvetica", 16, "bold"),
-                               bg="darkolivegreen1").grid(row=i, column=j, sticky=NSEW)
-                     else:
-                         Label(fenetre, text="Qzero", borderwidth=1, relief="solid",
-                               font=("Helvetica", 16, "bold")).grid(row=i, column=j, sticky=NSEW)
- """
+    for i in range(n + 4):
+        fenetre.grid_rowconfigure(i, weight=1)
+    for j in range(m + 3):
+        fenetre.grid_columnconfigure(j, weight=1)
+
+    canvas = Canvas(fenetre, width=1200, height=900, bg="lightblue")
+    canvas.grid(row=0, column=0, rowspan=n + 5, columnspan=m + 3, sticky=NSEW)
+
+    # On insère les éléments dans la fenêtre
+    Label(fenetre, text="Table de transition", font=("Helvetica", 20, ["bold", "underline"]), bg="lightblue").grid(
+        row=0, column=0,
+        sticky=N, padx=5,
+        pady=10,
+        columnspan=m + 3)
+
+    Label(fenetre, text="État initial", font=("Helvetica", 15, "bold"), bg="lightblue").grid(row=0, column=0,
+                                                                                             sticky=S, padx=5,
+                                                                                             pady=5, columnspan=m + 3)
+
+
+    statesList = Listbox(fenetre, selectmode="multiple", exportselection=0, width=10, height=4, font=("Helvetica", 14),
+                         justify="center")
+    statesList.grid(row=1, column=0, sticky=N, padx=5, pady=5, columnspan=m + 3)
+
+    for i in Q:
+        statesList.insert(END, i)
+
+    for i in range(1, n + 2):
+        for j in range(1, m + 2):
+            if i == 1:
+                if j == 1:
+                    Label(fenetre, text="Q \ Σ", borderwidth=1, relief="solid",
+                          font=("Helvetica", 16, "bold")).grid(row=i + 1, column=j, sticky=NSEW)
+                else:
+                    Label(fenetre, text=sig[j - 2], borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
+                        row=i + 1, column=j, sticky=NSEW)
+            else:
+                if j == 1:
+                    if list(Q)[i - 2] in A:
+                        Label(fenetre, text=list(Q)[i - 2], borderwidth=1, relief="solid",
+                              font=("Helvetica", 16, "bold"),
+                              bg="darkolivegreen1").grid(row=i + 1, column=j, sticky=NSEW)
+                    else:
+                        Label(fenetre, text=list(Q)[i - 2], borderwidth=1, relief="solid",
+                              font=("Helvetica", 16, "bold")).grid(row=i + 1, column=j, sticky=NSEW)
+
+                else:
+                    d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])] = Entry(fenetre, width=10, justify="center",
+                                                                           font=("Helvetica", 16), borderwidth=1,
+                                                                           relief="solid")
+                    d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])].grid(row=i + 1, column=j, sticky=NSEW)
+
+    Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
+
+    Button(fenetre, text="Valider", command=lambda: validerTableauNonDeter(Q, sig, T, statesList, A),
+           bg="lightseagreen", font=("Helvetica", 16, "bold")).grid(row=n + 4, column=0, sticky=NSEW, padx=5, pady=5,
+                                                                    columnspan=m + 3)
+
+
+def validerTableauNonDeter(Q, sig, T, Qzero, A):
+    Qzero = set(i + 1 for i in Qzero.curselection())
+
+    if not Qzero:
+        messagebox.showerror("Erreur", "L'état initial n'a pas été sélectionné")
+        return
 
 
 def showChaine():
