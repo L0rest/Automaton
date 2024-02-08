@@ -135,7 +135,7 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v2):
 
     Q = set(range(1, int(nbEtats) + 1))
     sig = sorted(alphabet.split(","))
-    T = {(i, j): 1 for i in Q for j in sig} if v2 == "Complet" else {}
+    T = {}
     A = set([int(i) for i in etatsAcceptants.split(",")])
     d = {}
 
@@ -214,6 +214,8 @@ def validerTableauDeter(Q, sig, T, Qzero, A, d):
         return
 
     for key, value in d.items():
+        if not value.get():
+            continue
         T[(int(key[0]), key[1])] = int(value.get())
 
     automate = (Q, sig, T, int(Qzero), A)
