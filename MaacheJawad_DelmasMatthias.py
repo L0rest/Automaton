@@ -276,8 +276,8 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v2):
                                                                                              sticky=S, padx=5,
                                                                                              pady=5, columnspan=m + 3)
 
-
-    statesList = Listbox(fenetre, selectmode="multiple", exportselection=0, width=10, height=4, font=("Helvetica", 14),
+    statesList = Listbox(fenetre, selectmode="multiple", exportselection=0, width=10, height=min(4, n),
+                         font=("Helvetica", 14),
                          justify="center")
     statesList.grid(row=1, column=0, sticky=N, padx=5, pady=5, columnspan=m + 3)
 
@@ -311,17 +311,42 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v2):
 
     Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
 
-    Button(fenetre, text="Valider", command=lambda: validerTableauNonDeter(Q, sig, T, statesList, A),
+    Button(fenetre, text="Valider", command=lambda: validerTableauNonDeter(Q, sig, T, statesList, A, d, v2),
            bg="lightseagreen", font=("Helvetica", 16, "bold")).grid(row=n + 4, column=0, sticky=NSEW, padx=5, pady=5,
                                                                     columnspan=m + 3)
 
 
-def validerTableauNonDeter(Q, sig, T, Qzero, A):
+def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v2):
     Qzero = set(i + 1 for i in Qzero.curselection())
 
     if not Qzero:
         messagebox.showerror("Erreur", "L'état initial n'a pas été sélectionné")
         return
+
+    for key, value in d.items():
+        print(key, value.get())
+        valueSet = set()
+        for i in value.get().split(","):
+            print(key)
+            if v2 == "Complet" and not i:
+                messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides")
+                return
+            if i and not 0 < int(i) <= len(Q):
+                messagebox.showerror("Erreur", "Un ou plusieurs états ne sont pas dans l'ensemble des états")
+                return
+            if i:
+                valueSet.add(int(i))
+
+        if valueSet:
+            T[(int(key[0]), key[1])] = valueSet
+
+    automate = (Q, sig, T, Qzero, A)
+    print(automate)
+
+    listeAutomates["A" + str(len(listeAutomates) + 1)] = automate
+    listAutomates.insert(END, "A" + str(len(listeAutomates)))
+
+    messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
 def showChaine():
