@@ -82,58 +82,69 @@ def creerAutomate():
     for i in range(13):
         fenetre.grid_rowconfigure(i, weight=1)
 
-    v2 = tkinter.StringVar()
-    v2.set(None)
+    v = tkinter.StringVar()
+    v.set(None)
 
     Canvas(fenetre, width=800, height=600, bg="lightblue").grid(row=0, column=0, rowspan=13, columnspan=4, sticky=NSEW)
 
+    Label(fenetre, text="Nom de l'automate", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=0,
+                                                                                                  column=0,
+                                                                                                  sticky=S,
+                                                                                                  padx=5,
+                                                                                                  pady=5,
+                                                                                                  columnspan=4)
+    nomAutomate = Entry(fenetre, width=50, justify="center")
+    nomAutomate.grid(row=1, column=0, sticky=N, padx=5, pady=5, columnspan=4)
+
     # On insère les éléments dans la fenêtre
-    Label(fenetre, text="Nombre d'états", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=0, column=0,
+    Label(fenetre, text="Nombre d'états", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=2, column=0,
                                                                                                sticky=S,
                                                                                                pady=5, columnspan=4)
     nbEtats = Entry(fenetre, width=10, justify="center")
-    nbEtats.grid(row=1, column=0, pady=5, sticky=N, columnspan=4)
+    nbEtats.grid(row=3, column=0, pady=5, sticky=N, columnspan=4)
 
     Label(fenetre, text="Alphabet (séparer les éléments par des virgules)", font=("Helvetica", 13, "bold"),
-          bg="lightblue").grid(row=2,
+          bg="lightblue").grid(row=4,
                                column=0,
                                sticky=S,
                                pady=5, columnspan=4)
     alphabet = Entry(fenetre, width=50, justify="center")
-    alphabet.grid(row=3, column=0, pady=5, sticky=N, columnspan=4)
+    alphabet.grid(row=5, column=0, pady=5, sticky=N, columnspan=4)
 
     Label(fenetre, text="Etats acceptants (séparer les éléments par des virgules)", font=("Helvetica", 13, "bold"),
-          bg="lightblue").grid(row=4, column=0, sticky=S, pady=5, columnspan=4)
+          bg="lightblue").grid(row=6, column=0, sticky=S, pady=5, columnspan=4)
     etatsAcceptants = Entry(fenetre, width=50, justify="center")
-    etatsAcceptants.grid(row=5, column=0, pady=5, sticky=N, columnspan=4)
+    etatsAcceptants.grid(row=7, column=0, pady=5, sticky=N, columnspan=4)
 
-    Label(fenetre, text="Automate Complet / Incomplet", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=6,
+    Label(fenetre, text="Automate Complet / Incomplet", font=("Helvetica", 13, "bold"), bg="lightblue").grid(row=8,
                                                                                                              column=0,
                                                                                                              sticky=S,
                                                                                                              padx=5,
                                                                                                              pady=5,
                                                                                                              columnspan=4)
-    r3 = Radiobutton(fenetre, text="Automate complet", variable=v2, value="Complet", bg="lightblue")
-    r3.grid(row=7, column=1, sticky=N, padx=5, pady=5)
-    r4 = Radiobutton(fenetre, text="Automate incomplet", variable=v2, value="Incomplet", bg="lightblue")
-    r4.grid(row=7, column=2, sticky=N, padx=5, pady=5)
+    r3 = Radiobutton(fenetre, text="Automate complet", variable=v, value="Complet", bg="lightblue")
+    r3.grid(row=9, column=1, sticky=N, padx=5, pady=5)
+    r4 = Radiobutton(fenetre, text="Automate incomplet", variable=v, value="Incomplet", bg="lightblue")
+    r4.grid(row=9, column=2, sticky=N, padx=5, pady=5)
 
-    Label(fenetre, text=" ", bg="lightblue").grid(row=8, column=0, sticky=NSEW, columnspan=4)
+    Label(fenetre, text=" ", bg="lightblue").grid(row=10, column=0, sticky=NSEW, columnspan=4)
 
     Button(fenetre, text="Créer AFD",
-           command=lambda: creerTableauDeter(nbEtats.get(), alphabet.get(), etatsAcceptants.get(), v2.get()),
-           bg="lightseagreen").grid(row=9, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
+           command=lambda: creerTableauDeter(nbEtats.get(), alphabet.get(), etatsAcceptants.get(), v.get(),
+                                             nomAutomate.get()),
+           bg="lightseagreen").grid(row=11, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
     Button(fenetre, text="Créer AFN",
-           command=lambda: creerTableauNonDeter(nbEtats.get(), alphabet.get(), etatsAcceptants.get(), v2.get()),
-           bg="lightseagreen").grid(row=9, column=2, sticky=NSEW, padx=5, pady=5, columnspan=2)
+           command=lambda: creerTableauNonDeter(nbEtats.get(), alphabet.get(), etatsAcceptants.get(), v.get(),
+                                                nomAutomate.get()),
+           bg="lightseagreen").grid(row=11, column=2, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
 
-def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v2):
+def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
     if nbEtats and int(nbEtats) < 1:
         messagebox.showerror("Erreur", "Le nombre d'états doit être supérieur à 0")
         return
 
-    if not nbEtats or not alphabet or not etatsAcceptants or not v2:
+    if not nbEtats or not alphabet or not etatsAcceptants or not v or not nomAutomate:
         messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides")
         return
 
@@ -202,17 +213,17 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v2):
                                                                                   justify="center",
                                                                                   font=("Helvetica", 16))
                     d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])].grid(row=i + 1, column=j, sticky=NSEW)
-                    if v2 == "Complet":
+                    if v == "Complet":
                         d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])].set(1)
 
     Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
 
-    Button(fenetre, text="Valider", command=lambda: validerTableauDeter(Q, sig, T, statesList.get(), A, d),
+    Button(fenetre, text="Valider", command=lambda: validerTableauDeter(Q, sig, T, statesList.get(), A, d, nomAutomate),
            bg="lightseagreen", font=("Helvetica", 16, "bold")).grid(row=n + 4, column=0, sticky=NSEW, padx=5, pady=5,
                                                                     columnspan=m + 3)
 
 
-def validerTableauDeter(Q, sig, T, Qzero, A, d):
+def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate):
     if not Qzero:
         messagebox.showerror("Erreur", "L'état initial n'a pas été sélectionné")
         return
@@ -224,18 +235,18 @@ def validerTableauDeter(Q, sig, T, Qzero, A, d):
 
     automate = (Q, sig, T, int(Qzero), A)
 
-    listeAutomates["A" + str(len(listeAutomates) + 1)] = automate
-    listAutomates.insert(END, "A" + str(len(listeAutomates)))
+    listeAutomates[nomAutomate] = automate
+    listAutomates.insert(END, nomAutomate)
 
     messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
-def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v2):
+def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
     if nbEtats and int(nbEtats) < 1:
         messagebox.showerror("Erreur", "Le nombre d'états doit être supérieur à 0")
         return
 
-    if not nbEtats or not alphabet or not etatsAcceptants or not v2:
+    if not nbEtats or not alphabet or not etatsAcceptants or not v or not nomAutomate:
         messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides")
         return
 
@@ -311,12 +322,12 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v2):
 
     Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
 
-    Button(fenetre, text="Valider", command=lambda: validerTableauNonDeter(Q, sig, T, statesList, A, d, v2),
+    Button(fenetre, text="Valider", command=lambda: validerTableauNonDeter(Q, sig, T, statesList, A, d, v, nomAutomate),
            bg="lightseagreen", font=("Helvetica", 16, "bold")).grid(row=n + 4, column=0, sticky=NSEW, padx=5, pady=5,
                                                                     columnspan=m + 3)
 
 
-def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v2):
+def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate):
     Qzero = set(i + 1 for i in Qzero.curselection())
 
     if not Qzero:
@@ -328,7 +339,7 @@ def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v2):
         valueSet = set()
         for i in value.get().split(","):
             print(key)
-            if v2 == "Complet" and not i:
+            if v == "Complet" and not i:
                 messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides")
                 return
             if i and not 0 < int(i) <= len(Q):
@@ -341,10 +352,9 @@ def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v2):
             T[(int(key[0]), key[1])] = valueSet
 
     automate = (Q, sig, T, Qzero, A)
-    print(automate)
 
-    listeAutomates["A" + str(len(listeAutomates) + 1)] = automate
-    listAutomates.insert(END, "A" + str(len(listeAutomates)))
+    listeAutomates[nomAutomate] = automate
+    listAutomates.insert(END, nomAutomate)
 
     messagebox.showinfo("Succès", "L'automate a bien été créé")
 
