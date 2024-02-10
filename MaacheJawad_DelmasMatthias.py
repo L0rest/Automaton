@@ -19,7 +19,15 @@ ACTUAL_RESULT = False
 
 ##################################### FONCTIONS #####################################
 
+
 def lireMot(aut, m):
+    """
+    Fonction qui permet de lire un mot avec un automate
+
+    @param aut:
+    @param m:
+    @return: bool, list
+    """
     Q, sig, T, Qzero, A = aut
     i = 0
     n = len(m)
@@ -38,10 +46,18 @@ def lireMot(aut, m):
 
 
 def obtenirAutomate():
+    """
+    Fonction qui permet d'obtenir l'automate sélectionné dans la liste
+    @return:
+    """
     return listeAutomates[listAutomates.get(ACTIVE)]
 
 
 def testerMot():
+    """
+    Fonction qui permet de tester un mot avec un automate
+    @return:
+    """
     global ACTUAL_PROGRESS
     global ACTUAL_WORD
     global ACTUAL_RESULT
@@ -69,6 +85,10 @@ def testerMot():
 
 
 def creerAutomate():
+    """
+    Fonction qui permet de créer un automate
+    @return:
+    """
     # On ouvre une nouvelle fenêtre
     fenetre = Toplevel(root)
     fenetre.title("Création d'un automate")
@@ -140,6 +160,15 @@ def creerAutomate():
 
 
 def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
+    """
+    Fonction qui permet de créer un tableau pour un automate déterministe
+    @param nbEtats:
+    @param alphabet:
+    @param etatsAcceptants:
+    @param v:
+    @param nomAutomate:
+    @return:
+    """
     if nbEtats and int(nbEtats) < 1:
         messagebox.showerror("Erreur", "Le nombre d'états doit être supérieur à 0")
         return
@@ -224,6 +253,17 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
 
 
 def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate):
+    """
+    Fonction qui permet de valider le tableau de transition pour un automate déterministe
+    @param Q:
+    @param sig:
+    @param T:
+    @param Qzero:
+    @param A:
+    @param d:
+    @param nomAutomate:
+    @return:
+    """
     if not Qzero:
         messagebox.showerror("Erreur", "L'état initial n'a pas été sélectionné")
         return
@@ -242,6 +282,15 @@ def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate):
 
 
 def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
+    """
+    Fonction qui permet de créer un tableau pour un automate non déterministe
+    @param nbEtats:
+    @param alphabet:
+    @param etatsAcceptants:
+    @param v:
+    @param nomAutomate:
+    @return:
+    """
     if nbEtats and int(nbEtats) < 1:
         messagebox.showerror("Erreur", "Le nombre d'états doit être supérieur à 0")
         return
@@ -328,6 +377,18 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
 
 
 def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate):
+    """
+    Fonction qui permet de valider le tableau de transition pour un automate non déterministe
+    @param Q:
+    @param sig:
+    @param T:
+    @param Qzero:
+    @param A:
+    @param d:
+    @param v:
+    @param nomAutomate:
+    @return:
+    """
     Qzero = set(i + 1 for i in Qzero.curselection())
 
     if not Qzero:
@@ -359,6 +420,10 @@ def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate):
 
 
 def showChaine():
+    """
+    Fonction qui permet d'afficher la lecture en chaîne
+    @return:
+    """
     global ACTUAL_PROGRESS
     global ACTUAL_WORD
     global ACTUAL_RESULT
@@ -429,6 +494,10 @@ def showChaine():
 
 
 def showRuban():
+    """
+    Fonction qui permet d'afficher la lecture en ruban
+    @return:
+    """
     global ACTUAL_PROGRESS
     global ACTUAL_WORD
     global ACTUAL_RESULT
@@ -499,6 +568,10 @@ def showRuban():
 
 
 def AfficherTable():
+    """
+    Fonction qui permet d'afficher la table de transition
+    @return:
+    """
     automate = obtenirAutomate()
     Q, sig, T, Qzero, A = automate
     Q, sig = sorted(list(Q)), sorted(list(sig))
@@ -557,6 +630,10 @@ def AfficherTable():
 
 
 def complet():
+    """
+    Fonction qui permet de compléter un automate
+    @return:
+    """
     automate = obtenirAutomate()
     Q, sig, T, Qzero, A = automate
 
@@ -580,6 +657,11 @@ def complet():
 
 
 def emonder(aut):
+    """
+    Fonction qui permet d'émonder un automate
+    @param aut:
+    @return:
+    """
     pass
 
 
