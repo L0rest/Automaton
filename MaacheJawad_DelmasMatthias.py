@@ -442,7 +442,7 @@ def showRuban():
     fenetre.geometry(str(n * 75 + 175) + "x450")
 
     canvas = Canvas(fenetre, width=n * 75 + 175, height=450, bg="lightblue")
-    canvas.pack(sticky=NSEW)
+    canvas.pack()
 
     def drawRuban(state):
         canvas.delete("all")
@@ -557,8 +557,9 @@ def AfficherTable():
                             row=i, column=j, sticky=NSEW)
 
 
-def complet(aut):
-    Q, sig, T, Qzero, A = aut
+def complet():
+    automate = obtenirAutomate()
+    Q, sig, T, Qzero, A = automate
 
     if len(T) < len(Q) * len(sig):
         Q.add(len(Q) + 1)
@@ -568,7 +569,18 @@ def complet(aut):
             if not (n, l) in T:
                 T[(n, l)] = len(Q)
 
-    return Q, sig, T, Qzero, A
+    automate = (Q, sig, T, Qzero, A)
+    listeAutomates[listAutomates.get(ACTIVE)] = automate
+
+    # On remplace l'automate dans la liste
+    listAutomates.delete(ACTIVE)
+    listAutomates.insert(ACTIVE, listAutomates.get(ACTIVE))
+
+    messagebox.showinfo("Succès", "L'automate a bien été complété")
+
+
+def emonder(aut):
+    pass
 
 
 ##################################### INTERFACE #####################################
@@ -576,7 +588,7 @@ def complet(aut):
 # On crée la fenêtre principale
 root = Tk()
 root.title("Automates")
-root.geometry("1000x500")
+root.geometry("1000x600")
 # On crée un grid pour la fenêtre
 root.grid_columnconfigure(0, weight=1)
 root.grid_columnconfigure(1, weight=1)
@@ -586,6 +598,10 @@ root.grid_columnconfigure(4, weight=1)
 root.grid_columnconfigure(5, weight=1)
 root.grid_columnconfigure(6, weight=1)
 root.grid_columnconfigure(7, weight=1)
+root.grid_columnconfigure(8, weight=1)
+root.grid_columnconfigure(9, weight=1)
+root.grid_columnconfigure(10, weight=1)
+root.grid_columnconfigure(11, weight=1)
 root.grid_rowconfigure(0, weight=1)
 root.grid_rowconfigure(1, weight=1)
 root.grid_rowconfigure(2, weight=1)
@@ -596,44 +612,56 @@ root.grid_rowconfigure(4, weight=1)
 
 
 ###### PARTIE GAUCHE ######
-Canvas(root, width=500, height=500, bg="lightblue").grid(row=0, column=0, rowspan=8, columnspan=2, sticky=NSEW)
+Canvas(root, width=500, height=500, bg="lightblue").grid(row=0, column=0, rowspan=12, columnspan=2, sticky=NSEW)
 
 # On crée un bouton pour créer un automate
 boutonCreer = Button(root, text="Créer un automate", bg="lightseagreen", command=creerAutomate,
                      font=("Helvetica", 14, "bold"))
 boutonCreer.grid(row=0, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
+# Label vide pour créer un espace entre les éléments (plus esthétique)
+Label(root, text=" ", bg="lightblue").grid(row=1, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
+
 # On crée la liste des automates
 labelAutomates = Label(root, text="Liste des automates", bg="lightblue", font=("Helvetica", 14, ["bold", "underline"]),
                        justify="center")
-labelAutomates.grid(row=1, column=0, sticky=S, padx=5, pady=5, columnspan=2)
-listAutomates = Listbox(root, justify="center", font=("Helvetica", 12), selectmode=SINGLE)
-listAutomates.grid(row=2, column=0, rowspan=2, sticky=NSEW, padx=5, pady=5, columnspan=2)
+labelAutomates.grid(row=2, column=0, sticky=S, padx=5, pady=5, columnspan=2)
+listAutomates = Listbox(root, justify="center", font=("Helvetica", 12), selectmode=SINGLE, height=8)
+listAutomates.grid(row=3, column=0, rowspan=2, sticky=NSEW, padx=5, pady=5, columnspan=2)
+
+# On crée un bouton pour compléter l'automate
+boutonCompleter = Button(root, text="Compléter l'automate", bg="lightseagreen", font=("Helvetica", 12, "bold"),
+                         command=complet)
+boutonCompleter.grid(row=5, column=0, sticky=NSEW, padx=5, pady=5)
+
+# On crée un bouton pour émonder l'automate
+boutonEmonder = Button(root, text="Émonder l'automate", bg="lightseagreen", font=("Helvetica", 12, "bold"),
+                       command=lambda: emonder(listeAutomates[obtenirAutomate()]))
+boutonEmonder.grid(row=5, column=1, sticky=NSEW, padx=5, pady=5)
 
 # On crée un bouton pour afficher la table de transition de l'automate sélectionné
 boutonTable = Button(root, text="Afficher la table de transition", bg="lightseagreen", font=("Helvetica", 12, "bold"),
                      command=AfficherTable)
-boutonTable.grid(row=4, column=0, sticky=N, padx=5, pady=5, columnspan=2)
+boutonTable.grid(row=6, column=0, sticky=NS, padx=5, pady=5, columnspan=2)
+
+# Label vide pour créer un espace entre les éléments (plus esthétique)
+Label(root, text=" ", bg="lightblue").grid(row=7, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
 # On crée une zone de texte pour taper le mot à tester
 labelMot = Label(root, text="Mot à tester", bg="lightblue", font=("Helvetica", 14, ["bold", "underline"]))
-labelMot.grid(row=4, column=0, sticky=S, padx=5, pady=5, columnspan=2)
+labelMot.grid(row=8, column=0, sticky=S, padx=5, pady=5, columnspan=2)
 mot = Entry(root)
-mot.grid(row=5, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
+mot.grid(row=9, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
 # Label vide pour créer un espace entre les éléments (plus esthétique)
-Label(root, text=" ", bg="lightblue").grid(row=6, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
+Label(root, text=" ", bg="lightblue").grid(row=10, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
 # On crée un bouton pour tester le mot
 boutonTester = Button(root, text="Tester", command=testerMot, bg="lightseagreen", font=("Helvetica", 12, "bold"))
-boutonTester.grid(row=7, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
-
-# On crée un bouton pour quitter
-boutonQuitter = Button(root, text="Quitter", command=root.destroy, bg="red")
-boutonQuitter.grid(row=0, column=4, sticky=NE, padx=5, pady=5)
+boutonTester.grid(row=11, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
 ####### PARTIE DROITE #######
-Canvas(root, width=500, height=500, bg="lightgray").grid(row=0, column=2, rowspan=8, columnspan=3, sticky=NSEW)
+Canvas(root, width=500, height=500, bg="lightgray").grid(row=0, column=2, rowspan=12, columnspan=3, sticky=NSEW)
 
 # On crée une zone de texte pour afficher le résultat
 labelResultat = Label(root, text="Résultat de la lecture", font=("Helvetica", 16, ["bold", "underline"]),
@@ -646,9 +674,9 @@ resLabel.grid(row=1, column=2, sticky=N, padx=5, pady=5, columnspan=3)
 Label(root, text=" ", bg="lightgray").grid(row=2, column=2, padx=5, pady=5, columnspan=3, rowspan=2)
 
 # On crée une zone de texte pour afficher la lecture en chaine et en ruban
-boutonChaine = Button(root, text="Voir la lecture en chaîne", command=showChaine, bg="darkgoldenrod2",
+boutonChaine = Button(root, text="Voir la lecture en chaîne", width=20, command=showChaine, bg="darkgoldenrod2",
                       font=("Helvetica", 12, "bold"))
-boutonRuban = Button(root, text="Voir la lecture en ruban", command=showRuban, bg="darkgoldenrod2",
+boutonRuban = Button(root, text="Voir la lecture en ruban", width=20, command=showRuban, bg="darkgoldenrod2",
                      font=("Helvetica", 12, "bold"))
 
 ##################################### MAIN #####################################
