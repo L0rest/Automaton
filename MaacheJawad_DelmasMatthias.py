@@ -504,7 +504,6 @@ def AfficherTable():
     Q, sig = sorted(list(Q)), sorted(list(sig))
     n = len(Q)
     m = len(sig)
-    print(T)
 
     # On crée une nouvelle fenêtre
     fenetre = Toplevel(root)
@@ -573,8 +572,9 @@ def complet():
     listeAutomates[listAutomates.get(ACTIVE)] = automate
 
     # On remplace l'automate dans la liste
-    listAutomates.delete(ACTIVE)
-    listAutomates.insert(ACTIVE, listAutomates.get(ACTIVE))
+    listAutomates.delete(0, END)
+    for key in listeAutomates:
+        listAutomates.insert(END, key)
 
     messagebox.showinfo("Succès", "L'automate a bien été complété")
 
