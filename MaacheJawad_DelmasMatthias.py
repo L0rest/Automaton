@@ -208,13 +208,13 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
                               font=("Helvetica", 16, "bold")).grid(row=i + 1, column=j, sticky=NSEW)
 
                 else:
-                    d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])] = ttk.Combobox(fenetre, values=[str(i) for i in Q],
-                                                                                  state="readonly",
-                                                                                  justify="center",
-                                                                                  font=("Helvetica", 16))
-                    d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])].grid(row=i + 1, column=j, sticky=NSEW)
+                    d["{0},{1}".format(list(Q)[i - 2], sig[j - 2])] = ttk.Combobox(fenetre, values=[str(i) for i in Q],
+                                                                                   state="readonly",
+                                                                                   justify="center",
+                                                                                   font=("Helvetica", 16))
+                    d["{0},{1}".format(list(Q)[i - 2], sig[j - 2])].grid(row=i + 1, column=j, sticky=NSEW)
                     if v == "Complet":
-                        d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])].set(1)
+                        d["{0},{1}".format(list(Q)[i - 2], sig[j - 2])].set(1)
 
     Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
 
@@ -229,9 +229,9 @@ def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate):
         return
 
     for key, value in d.items():
-        if not value.get():
-            continue
-        T[(int(key[0]), key[1])] = int(value.get())
+        if value.get():
+            num, let = key.split(",")
+            T[(int(num), let)] = int(value.get())
 
     automate = (Q, sig, T, int(Qzero), A)
 
@@ -315,10 +315,10 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
                               font=("Helvetica", 16, "bold")).grid(row=i + 1, column=j, sticky=NSEW)
 
                 else:
-                    d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])] = Entry(fenetre, width=10, justify="center",
-                                                                           font=("Helvetica", 16), borderwidth=1,
-                                                                           relief="solid")
-                    d["{0}{1}".format(list(Q)[i - 2], sig[j - 2])].grid(row=i + 1, column=j, sticky=NSEW)
+                    d["{0},{1}".format(list(Q)[i - 2], sig[j - 2])] = Entry(fenetre, width=10, justify="center",
+                                                                            font=("Helvetica", 16), borderwidth=1,
+                                                                            relief="solid")
+                    d["{0},{1}".format(list(Q)[i - 2], sig[j - 2])].grid(row=i + 1, column=j, sticky=NSEW)
 
     Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
 
@@ -335,10 +335,8 @@ def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate):
         return
 
     for key, value in d.items():
-        print(key, value.get())
         valueSet = set()
         for i in value.get().split(","):
-            print(key)
             if v == "Complet" and not i:
                 messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides")
                 return
@@ -349,7 +347,8 @@ def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate):
                 valueSet.add(int(i))
 
         if valueSet:
-            T[(int(key[0]), key[1])] = valueSet
+            num, let = key.split(",")
+            T[(int(num), let)] = valueSet
 
     automate = (Q, sig, T, Qzero, A)
 
@@ -505,6 +504,7 @@ def AfficherTable():
     Q, sig = sorted(list(Q)), sorted(list(sig))
     n = len(Q)
     m = len(sig)
+    print(T)
 
     # On crée une nouvelle fenêtre
     fenetre = Toplevel(root)
@@ -604,9 +604,10 @@ boutonCreer = Button(root, text="Créer un automate", bg="lightseagreen", comman
 boutonCreer.grid(row=0, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
 # On crée la liste des automates
-labelAutomates = Label(root, text="Liste des automates", bg="lightblue", font=("Helvetica", 14, ["bold", "underline"]))
+labelAutomates = Label(root, text="Liste des automates", bg="lightblue", font=("Helvetica", 14, ["bold", "underline"]),
+                       justify="center")
 labelAutomates.grid(row=1, column=0, sticky=S, padx=5, pady=5, columnspan=2)
-listAutomates = Listbox(root)
+listAutomates = Listbox(root, justify="center", font=("Helvetica", 12), selectmode=SINGLE)
 listAutomates.grid(row=2, column=0, rowspan=2, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
 # On crée un bouton pour afficher la table de transition de l'automate sélectionné
