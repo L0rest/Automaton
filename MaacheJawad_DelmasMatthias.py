@@ -81,8 +81,8 @@ def testerMot():
     ACTUAL_PROGRESS = progress
     ACTUAL_WORD = motATester
     ACTUAL_RESULT = resultat
-    boutonChaine.grid(row=4, column=2, sticky=S, padx=5, pady=5, columnspan=3)
-    boutonRuban.grid(row=5, column=2, sticky=N, padx=5, pady=5, columnspan=3)
+    boutonChaine.grid(row=5, column=2, sticky=S, padx=5, pady=5, columnspan=3)
+    boutonRuban.grid(row=6, column=2, sticky=N, padx=5, pady=5, columnspan=3)
 
 
 def creerAutomate():
@@ -579,6 +579,9 @@ def AfficherTable():
     n = len(Q)
     m = len(sig)
 
+    if type(Qzero) == int:
+        Qzero = {Qzero}
+
     # On crée une nouvelle fenêtre
     fenetre = Toplevel(root)
     fenetre.title("Table de transition")
@@ -617,8 +620,8 @@ def AfficherTable():
                         Label(fenetre, text=Q[i - 2], borderwidth=1, relief="solid",
                               font=("Helvetica", 16, "bold")).grid(row=i, column=j, sticky=NSEW)
 
-                    if Q[i - 2] == Qzero:
-                        Label(fenetre, text="→", font=("Helvetica", 30, "bold"), bg="lightblue", fg="cyan4").grid(row=i,
+                    if Q[i - 2] in Qzero:
+                        Label(fenetre, text="⇒", font=("Helvetica", 30, "bold"), bg="lightblue", fg="cyan4").grid(row=i,
                                                                                                                   column=0,
                                                                                                                   sticky=E)
                 else:
@@ -828,14 +831,14 @@ boutonTester.grid(row=11, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 Canvas(root, width=500, height=500, bg="lightgray").grid(row=0, column=2, rowspan=12, columnspan=3, sticky=NSEW)
 
 # On crée une zone de texte pour afficher le résultat
-labelResultat = Label(root, text="Résultat de la lecture", font=("Helvetica", 16, ["bold", "underline"]),
+labelResultat = Label(root, text="Résultat de la lecture", font=("Helvetica", 20, ["bold", "underline"]),
                       bg="lightgray")
-labelResultat.grid(row=0, column=2, padx=5, pady=5, columnspan=3)
-resLabel = Label(root, bg="lightgray", text=" ", font=("Helvetica", 12, "bold"))
-resLabel.grid(row=1, column=2, sticky=N, padx=5, pady=5, columnspan=3)
+labelResultat.grid(row=1, column=2, padx=5, pady=5, columnspan=3)
+resLabel = Label(root, bg="lightgray", text=" ", font=("Helvetica", 16, "bold"))
+resLabel.grid(row=2, column=2, sticky=N, padx=5, pady=5, columnspan=3)
 
 # Label vide pour créer un espace entre les éléments (plus esthétique)
-Label(root, text=" ", bg="lightgray").grid(row=2, column=2, padx=5, pady=5, columnspan=3, rowspan=2)
+Label(root, text=" ", bg="lightgray").grid(row=3, column=2, padx=5, pady=5, columnspan=3, rowspan=2)
 
 # On crée une zone de texte pour afficher la lecture en chaine et en ruban
 boutonChaine = Button(root, text="Voir la lecture en chaîne", width=20, command=showChaine, bg="darkgoldenrod2",
