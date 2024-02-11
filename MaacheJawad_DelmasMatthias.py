@@ -9,8 +9,9 @@ from tkinter import ttk, messagebox
 ##################################### VARIABLES #####################################
 
 A1 = ({1, 2, 3}, {'a', 'b'}, {(1, 'a'): 2, (1, 'b'): 1, (2, 'a'): 2, (2, 'b'): 3, (3, 'a'): 3, (3, 'b'): 3}, 1, {3})
-
-listeAutomates = {"A1": A1}
+A2 = ({1, 2, 3, 4, 5}, {'a', 'b'},
+      {(1, 'a'): 3, (2, 'a'): 2, (2, 'b'): 1, (3, 'a'): 4, (3, 'b'): 5, (4, 'a'): 3, (5, 'a'): 5}, 1, {3})
+listeAutomates = {"A1": A1, "A2": A2}
 
 ACTUAL_PROGRESS = []
 ACTUAL_WORD = ""
@@ -656,13 +657,94 @@ def complet():
     messagebox.showinfo("Succès", "L'automate a bien été complété")
 
 
-def emonder(aut):
+def accessible(aut):
+    """
+    Fonction qui permet de trouver les états accessibles
+    @param aut:
+    @return:
+    """
+    Q, sig, T, Qzero, A = aut
+
+    visited = {Qzero}
+    queue = [Qzero]
+
+    while queue:
+        x = queue.pop(0)
+
+        for l in sig:
+            if (x, l) in T:
+                target = T[(x, l)]
+                if not target in visited:
+                    visited.add(target)
+                    queue.append(target)
+
+    return visited
+
+
+def coAccessible(aut):
+    """
+    Fonction qui permet de trouver les états co-accessibles
+    @param aut:
+    @return:
+    """
+    Q, sig, T, Qzero, A = aut
+
+    invT = {}
+    for k in T:
+        n, l = k
+        if not (T[k], l) in invT:
+            invT[(T[k], l)] = {n}
+        else:
+            invT[(T[k], l)].add(n)
+
+    visited = A.copy()
+    queue = list(A)
+
+    while queue:
+        x = queue.pop(0)
+
+        for l in sig:
+            if (x, l) in invT:
+                target = invT[(x, l)]
+                for val in target:
+                    if val not in visited:
+                        visited.add(val)
+                        queue.append(val)
+
+    return visited
+
+
+def emonder():
     """
     Fonction qui permet d'émonder un automate
     @param aut:
     @return:
     """
-    pass
+    aut = obtenirAutomate()
+    Q, sig, T, Qzero, A = aut
+
+    acc = accessible(aut)
+    coAcc = coAccessible(aut)
+
+    newQ = {i for i in acc if i in coAcc}
+
+    switch = {list(newQ)[i]: i + 1 for i in range(len(newQ))}
+
+    newA = {switch[i] for i in A}
+    newT = {(switch[n], l): switch[T[(n, l)]] for n in newQ for l in sig if ((n, l) in T and T[(n, l)] in newQ)}
+    newQ = set(range(1, len(newQ) + 1))
+
+    newQzero = switch[Qzero]
+
+    automate = (newQ, sig, newT, newQzero, newA)
+    listeAutomates[listAutomates.get(ACTIVE)] = automate
+
+    # On remplace l'automate dans la liste
+    listAutomates.delete(0, END)
+    for key in listeAutomates:
+        listAutomates.insert(END, key)
+
+    messagebox.showinfo("Succès", "L'automate a bien été émondé")
 
 
 ##################################### INTERFACE #####################################
@@ -718,7 +800,7 @@ boutonCompleter.grid(row=5, column=0, sticky=NSEW, padx=5, pady=5)
 
 # On crée un bouton pour émonder l'automate
 boutonEmonder = Button(root, text="Émonder l'automate", bg="lightseagreen", font=("Helvetica", 12, "bold"),
-                       command=lambda: emonder(listeAutomates[obtenirAutomate()]))
+                       command=emonder)
 boutonEmonder.grid(row=5, column=1, sticky=NSEW, padx=5, pady=5)
 
 # On crée un bouton pour afficher la table de transition de l'automate sélectionné
