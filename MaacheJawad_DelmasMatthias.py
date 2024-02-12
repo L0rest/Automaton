@@ -1,5 +1,5 @@
 # Owners : Maache Jawad, Delmas Matthias
-"""❌"""
+
 ############################################################################################################
 
 import tkinter
@@ -630,7 +630,7 @@ def AfficherTable():
                         Label(fenetre, text=T[(Q[i - 2], sig[j - 2])], borderwidth=1, relief="solid",
                               font=("Helvetica", 16)).grid(row=i, column=j, sticky=NSEW)
                     else:
-                        Label(fenetre, text="", borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
+                        Label(fenetre, text="❌", fg="red", borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
                             row=i, column=j, sticky=NSEW)
 
 
