@@ -272,9 +272,9 @@ def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate):
     for key, value in d.items():
         if value.get():
             num, let = key.split(",")
-            T[(int(num), let)] = int(value.get())
+            T[(int(num), let)] = {int(value.get())}
 
-    automate = (Q, sig, T, int(Qzero), A)
+    automate = (Q, sig, T, {int(Qzero)}, A)
 
     listeAutomates[nomAutomate] = automate
     listAutomates.insert(END, nomAutomate)
@@ -579,9 +579,6 @@ def AfficherTable():
     n = len(Q)
     m = len(sig)
 
-    if type(Qzero) == int:
-        Qzero = {Qzero}
-
     # On crée une nouvelle fenêtre
     fenetre = Toplevel(root)
     fenetre.title("Table de transition")
@@ -647,7 +644,8 @@ def complet():
     for n in Q:
         for l in sig:
             if not (n, l) in T:
-                T[(n, l)] = len(Q)
+                T[(n, l)] = {len(Q)}
+
 
     automate = (Q, sig, T, Qzero, A)
     listeAutomates[listAutomates.get(ACTIVE)] = automate
@@ -668,8 +666,8 @@ def accessible(aut):
     """
     Q, sig, T, Qzero, A = aut
 
-    visited = {Qzero}
-    queue = [Qzero]
+    visited = Qzero
+    queue = list(Qzero)
 
     while queue:
         x = queue.pop(0)
@@ -677,9 +675,10 @@ def accessible(aut):
         for l in sig:
             if (x, l) in T:
                 target = T[(x, l)]
-                if not target in visited:
-                    visited.add(target)
-                    queue.append(target)
+                for state in target:
+                    if not state in visited:
+                        visited.add(state)
+                        queue.append(state)
 
     return visited
 
@@ -737,8 +736,7 @@ def emonder():
     newT = {(switch[n], l): switch[T[(n, l)]] for n in newQ for l in sig if ((n, l) in T and T[(n, l)] in newQ)}
     newQ = set(range(1, len(newQ) + 1))
 
-    newQzero = switch[Qzero]
-
+    newQzero = {switch[i] for i in Qzero}
     automate = (newQ, sig, newT, newQzero, newA)
     listeAutomates[listAutomates.get(ACTIVE)] = automate
 
