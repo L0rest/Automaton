@@ -1,5 +1,17 @@
 # Owners : Maache Jawad, Delmas Matthias
 
+# Cette application permet :
+# - La lecture DETERMINISTE d'un mot par un automate
+# - La création d'un automate (AFN ou AFD, complet ou incomplet)
+# - La visualisation de la table de transition
+# - La complétion/émondage d'un automate
+# - La visualisation de la lecture en chaîne / ruban
+
+# Afin de faciliter la prise en charge des automates déterministes et non déterministes, nous avons choisi de
+# représenter les valeurs de la table de transition par des ensembles. Ainsi, pour un automate déterministe, chaque
+# valeur de la table de transition est un ensemble à un seul élément, tandis que pour un automate non déterministe,
+# chaque valeur est un ensemble de plusieurs éléments.
+
 ############################################################################################################
 
 import tkinter
@@ -8,9 +20,9 @@ from tkinter import ttk, messagebox
 
 ##################################### VARIABLES #####################################
 
-A1 = (
-{1, 2, 3}, {'a', 'b'}, {(1, 'a'): {2}, (1, 'b'): {1}, (2, 'a'): {2}, (2, 'b'): {3}, (3, 'a'): {3}, (3, 'b'): {3}}, {1},
-{3})
+A1 = ({1, 2, 3}, {'a', 'b'}, {(1, 'a'): {2}, (1, 'b'): {1}, (2, 'a'): {2}, (2, 'b'): {3}, (3, 'a'): {3}, (3, 'b'): {3}},
+      {1},
+      {3})
 A2 = ({1, 2, 3, 4, 5}, {'a', 'b'},
       {(1, 'a'): {3}, (2, 'a'): {2}, (2, 'b'): {1}, (3, 'a'): {4}, (3, 'b'): {5}, (4, 'a'): {3}, (5, 'a'): {5}}, {1},
       {3})
@@ -24,9 +36,9 @@ ACTUAL_RESULT = False
 ##################################### FONCTIONS #####################################
 
 
-def lireMot(aut, m):
+def lireMotDeter(aut, m):
     """
-    Fonction qui permet de lire un mot avec un automate
+    Fonction qui permet de lire un mot avec un automate déterministe
 
     @param aut:
     @param m:
@@ -35,18 +47,19 @@ def lireMot(aut, m):
     Q, sig, T, Qzero, A = aut
     i = 0
     n = len(m)
-    progress = [Qzero]
+    state = next(iter(Qzero))
+    progress = list(Qzero)
 
-    while i < n and Qzero != 0:
-        if (Qzero, m[i]) in T:
-            Qzero = T[(Qzero, m[i])]
+    while i < n and state != 0:
+        if (state, m[i]) in T:
+            state = next(iter(T[(state, m[i])]))
             i += 1
         else:
-            Qzero = 0
+            state = 0
 
-        progress.append(Qzero)
+        progress.append(state)
 
-    return Qzero in A, progress
+    return state in A, progress
 
 
 def obtenirAutomate():
@@ -72,7 +85,7 @@ def testerMot():
     motATester = mot.get()
 
     # On teste le mot
-    resultat, progress = lireMot(automate, motATester)
+    resultat, progress = lireMotDeter(automate, motATester)
 
     # On affiche le résultat
     if resultat:
@@ -155,15 +168,15 @@ def creerAutomate():
 
     Button(fenetre, text="Créer AFD",
            command=lambda: creerTableauDeter(nbEtats.get(), alphabet.get(), etatsAcceptants.get(), v.get(),
-                                             nomAutomate.get()),
+                                             nomAutomate.get(), fenetre),
            bg="lightseagreen").grid(row=11, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
     Button(fenetre, text="Créer AFN",
            command=lambda: creerTableauNonDeter(nbEtats.get(), alphabet.get(), etatsAcceptants.get(), v.get(),
-                                                nomAutomate.get()),
+                                                nomAutomate.get(), fenetre),
            bg="lightseagreen").grid(row=11, column=2, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
 
-def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
+def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, oldFenetre):
     """
     Fonction qui permet de créer un tableau pour un automate déterministe
     @param nbEtats:
@@ -193,6 +206,9 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
 
     n = len(Q)
     m = len(sig)
+
+    # On ferme la fenêtre précédente
+    oldFenetre.destroy()
 
     # On ouvre une nouvelle fenêtre
     fenetre = Toplevel(root)
@@ -251,12 +267,13 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
 
     Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
 
-    Button(fenetre, text="Valider", command=lambda: validerTableauDeter(Q, sig, T, statesList.get(), A, d, nomAutomate),
+    Button(fenetre, text="Valider",
+           command=lambda: validerTableauDeter(Q, sig, T, statesList.get(), A, d, nomAutomate, fenetre),
            bg="lightseagreen", font=("Helvetica", 16, "bold")).grid(row=n + 4, column=0, sticky=NSEW, padx=5, pady=5,
                                                                     columnspan=m + 3)
 
 
-def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate):
+def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate, fenetre):
     """
     Fonction qui permet de valider le tableau de transition pour un automate déterministe
     @param Q:
@@ -282,10 +299,11 @@ def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate):
     listeAutomates[nomAutomate] = automate
     listAutomates.insert(END, nomAutomate)
 
+    fenetre.destroy()
     messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
-def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
+def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, oldFenetre):
     """
     Fonction qui permet de créer un tableau pour un automate non déterministe
     @param nbEtats:
@@ -315,6 +333,9 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
 
     n = len(Q)
     m = len(sig)
+
+    # On ferme la fenêtre précédente
+    oldFenetre.destroy()
 
     # On ouvre une nouvelle fenêtre
     fenetre = Toplevel(root)
@@ -375,12 +396,13 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate):
 
     Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
 
-    Button(fenetre, text="Valider", command=lambda: validerTableauNonDeter(Q, sig, T, statesList, A, d, v, nomAutomate),
+    Button(fenetre, text="Valider",
+           command=lambda: validerTableauNonDeter(Q, sig, T, statesList, A, d, v, nomAutomate, fenetre),
            bg="lightseagreen", font=("Helvetica", 16, "bold")).grid(row=n + 4, column=0, sticky=NSEW, padx=5, pady=5,
                                                                     columnspan=m + 3)
 
 
-def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate):
+def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate, fenetre):
     """
     Fonction qui permet de valider le tableau de transition pour un automate non déterministe
     @param Q:
@@ -420,6 +442,7 @@ def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate):
     listeAutomates[nomAutomate] = automate
     listAutomates.insert(END, nomAutomate)
 
+    fenetre.destroy()
     messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
@@ -520,12 +543,12 @@ def showRuban():
     def drawRuban(state):
         canvas.delete("all")
         canvas.create_text((n * 75 + 175) / 2, 50, text="Lecture Ruban", font=("Helvetica", 20, ["underline", "bold"]))
-        buttonBack = Button(fenetre, text="⏪", command=lambda: drawRuban(state - 1), bg="lightseagreen",
+        buttonBack = Button(fenetre, text="⬅️", command=lambda: drawRuban(state - 1), bg="lightseagreen",
                             font=("Helvetica", 20, "bold"), width=5)
         buttonBack.pack()
         # Place the button to the center left of the canvas
         buttonBack.place(x=(n * 75 + 175) / 2 - 120, y=370)
-        buttonForward = Button(fenetre, text="⏩", command=lambda: drawRuban(state + 1), bg="lightseagreen",
+        buttonForward = Button(fenetre, text="➡️", command=lambda: drawRuban(state + 1), bg="lightseagreen",
                                font=("Helvetica", 20, "bold"), width=5)
         buttonForward.pack()
         buttonForward.place(x=(n * 75 + 175) / 2 + 30, y=370)
@@ -581,8 +604,7 @@ def AfficherTable():
     Q, sig = sorted(list(Q)), sorted(list(sig))
     n = len(Q)
     m = len(sig)
-    print(Qzero)
-    print(T)
+
     # On crée une nouvelle fenêtre
     fenetre = Toplevel(root)
     fenetre.title("Table de transition")
@@ -630,7 +652,8 @@ def AfficherTable():
                         Label(fenetre, text=T[(Q[i - 2], sig[j - 2])], borderwidth=1, relief="solid",
                               font=("Helvetica", 16)).grid(row=i, column=j, sticky=NSEW)
                     else:
-                        Label(fenetre, text="❌", fg="red", borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
+                        Label(fenetre, text="❌", fg="red", borderwidth=1, relief="solid",
+                              font=("Helvetica", 16, "bold")).grid(
                             row=i, column=j, sticky=NSEW)
 
 
@@ -735,24 +758,15 @@ def emonder():
     newQ = {i for i in acc if i in coAcc}
 
     switch = {list(newQ)[i]: i + 1 for i in range(len(newQ))}
-
     newA = {switch[i] for i in A}
-    newT = {}
-    for k in T:
-        n, l = k
-        for state in T[k]:
-            if state in newQ:
-                if (switch[n], l) in newT:
-                    newT[(switch[n], l)].add(switch[state])
-                else:
-                    newT[(switch[n], l)] = {switch[state]}
+    newT = {(switch[n], l): switch[next(iter(T[(n, l)]))] for n in newQ for l in sig if ((n, l) in T and next(iter(T[(n, l)])) in newQ)}
     newQ = set(range(1, len(newQ) + 1))
 
     newQzero = {switch[i] for i in Qzero}
 
     automate = (newQ, sig, newT, newQzero, newA)
     listeAutomates[listAutomates.get(ACTIVE)] = automate
-    print(newT)
+
     # On remplace l'automate dans la liste
     listAutomates.delete(0, END)
     for key in listeAutomates:
