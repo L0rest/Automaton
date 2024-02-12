@@ -1,5 +1,5 @@
 # Owners : Maache Jawad, Delmas Matthias
-
+"""❌"""
 ############################################################################################################
 
 import tkinter
@@ -8,9 +8,12 @@ from tkinter import ttk, messagebox
 
 ##################################### VARIABLES #####################################
 
-A1 = ({1, 2, 3}, {'a', 'b'}, {(1, 'a'): {2}, (1, 'b'): {1}, (2, 'a'): {2}, (2, 'b'): {3}, (3, 'a'): {3}, (3, 'b'): {3}}, {1}, {3})
+A1 = (
+{1, 2, 3}, {'a', 'b'}, {(1, 'a'): {2}, (1, 'b'): {1}, (2, 'a'): {2}, (2, 'b'): {3}, (3, 'a'): {3}, (3, 'b'): {3}}, {1},
+{3})
 A2 = ({1, 2, 3, 4, 5}, {'a', 'b'},
-      {(1, 'a'): {3}, (2, 'a'): {2}, (2, 'b'): {1}, (3, 'a'): {4}, (3, 'b'): {5}, (4, 'a'): {3}, (5, 'a'): {5}}, {1}, {3})
+      {(1, 'a'): {3}, (2, 'a'): {2}, (2, 'b'): {1}, (3, 'a'): {4}, (3, 'b'): {5}, (4, 'a'): {3}, (5, 'a'): {5}}, {1},
+      {3})
 listeAutomates = {"A1": A1, "A2": A2}
 
 ACTUAL_PROGRESS = []
@@ -647,7 +650,6 @@ def complet():
             if not (n, l) in T:
                 T[(n, l)] = {len(Q)}
 
-
     automate = (Q, sig, T, Qzero, A)
     listeAutomates[listAutomates.get(ACTIVE)] = automate
 
@@ -735,7 +737,15 @@ def emonder():
     switch = {list(newQ)[i]: i + 1 for i in range(len(newQ))}
 
     newA = {switch[i] for i in A}
-    newT = {(switch[n], l): switch[T[(n, l)]] for n in newQ for l in sig if ((n, l) in T and T[(n, l)] in newQ)}
+    newT = {}
+    for k in T:
+        n, l = k
+        for state in T[k]:
+            if state in newQ:
+                if (switch[n], l) in newT:
+                    newT[(switch[n], l)].add(switch[state])
+                else:
+                    newT[(switch[n], l)] = {switch[state]}
     newQ = set(range(1, len(newQ) + 1))
 
     newQzero = {switch[i] for i in Qzero}
