@@ -187,11 +187,19 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, oldFen
     @return:
     """
     if nbEtats and int(nbEtats) < 1:
-        messagebox.showerror("Erreur", "Le nombre d'états doit être supérieur à 0")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Le nombre d'états doit être supérieur à 0", parent=error_window)
+        error_window.destroy()
         return
 
     if not nbEtats or not alphabet or not etatsAcceptants or not v or not nomAutomate:
-        messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides", parent=error_window)
+        error_window.destroy()
         return
 
     Q = set(range(1, int(nbEtats) + 1))
@@ -201,7 +209,11 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, oldFen
     d = {}
 
     if any(x not in Q for x in A):
-        messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états", parent=error_window)
+        error_window.destroy()
         return
 
     n = len(Q)
@@ -286,7 +298,11 @@ def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate, fenetre):
     @return:
     """
     if not Qzero:
-        messagebox.showerror("Erreur", "L'état initial n'a pas été sélectionné")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "L'état initial n'a pas été sélectionné", parent=error_window)
+        error_window.destroy()
         return
 
     for key, value in d.items():
@@ -314,11 +330,19 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, old
     @return:
     """
     if nbEtats and int(nbEtats) < 1:
-        messagebox.showerror("Erreur", "Le nombre d'états doit être supérieur à 0")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Le nombre d'états doit être supérieur à 0", parent=error_window)
+        error_window.destroy()
         return
 
     if not nbEtats or not alphabet or not etatsAcceptants or not v or not nomAutomate:
-        messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides", parent=error_window)
+        error_window.destroy()
         return
 
     Q = set(range(1, int(nbEtats) + 1))
@@ -328,7 +352,11 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, old
     d = {}
 
     if any(x not in Q for x in A):
-        messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états", parent=error_window)
+        error_window.destroy()
         return
 
     n = len(Q)
@@ -418,17 +446,29 @@ def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate, fenetre):
     Qzero = set(i + 1 for i in Qzero.curselection())
 
     if not Qzero:
-        messagebox.showerror("Erreur", "L'état initial n'a pas été sélectionné")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Aucun état intial sélectionné", parent=error_window)
+        error_window.destroy()
         return
 
     for key, value in d.items():
         valueSet = set()
         for i in value.get().split(","):
             if v == "Complet" and not i:
-                messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides")
+                error_window = Toplevel(root)
+                error_window.withdraw()
+                error_window.attributes('-topmost', True)
+                messagebox.showerror("Erreur", "Un ou plusieurs champs sont vides", parent=error_window)
+                error_window.destroy()
                 return
             if i and not 0 < int(i) <= len(Q):
-                messagebox.showerror("Erreur", "Un ou plusieurs états ne sont pas dans l'ensemble des états")
+                error_window = Toplevel(root)
+                error_window.withdraw()
+                error_window.attributes('-topmost', True)
+                messagebox.showerror("Erreur", "Un ou plusieurs états ne sont pas dans l'ensemble des états", parent=error_window)
+                error_window.destroy()
                 return
             if i:
                 valueSet.add(int(i))
