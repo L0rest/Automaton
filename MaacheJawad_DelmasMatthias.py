@@ -8,9 +8,9 @@ from tkinter import ttk, messagebox
 
 ##################################### VARIABLES #####################################
 
-A1 = ({1, 2, 3}, {'a', 'b'}, {(1, 'a'): 2, (1, 'b'): 1, (2, 'a'): 2, (2, 'b'): 3, (3, 'a'): 3, (3, 'b'): 3}, 1, {3})
+A1 = ({1, 2, 3}, {'a', 'b'}, {(1, 'a'): {2}, (1, 'b'): {1}, (2, 'a'): {2}, (2, 'b'): {3}, (3, 'a'): {3}, (3, 'b'): {3}}, {1}, {3})
 A2 = ({1, 2, 3, 4, 5}, {'a', 'b'},
-      {(1, 'a'): 3, (2, 'a'): 2, (2, 'b'): 1, (3, 'a'): 4, (3, 'b'): 5, (4, 'a'): 3, (5, 'a'): 5}, 1, {3})
+      {(1, 'a'): {3}, (2, 'a'): {2}, (2, 'b'): {1}, (3, 'a'): {4}, (3, 'b'): {5}, (4, 'a'): {3}, (5, 'a'): {5}}, {1}, {3})
 listeAutomates = {"A1": A1, "A2": A2}
 
 ACTUAL_PROGRESS = []
@@ -578,7 +578,8 @@ def AfficherTable():
     Q, sig = sorted(list(Q)), sorted(list(sig))
     n = len(Q)
     m = len(sig)
-
+    print(Qzero)
+    print(T)
     # On crée une nouvelle fenêtre
     fenetre = Toplevel(root)
     fenetre.title("Table de transition")
@@ -666,7 +667,7 @@ def accessible(aut):
     """
     Q, sig, T, Qzero, A = aut
 
-    visited = Qzero
+    visited = Qzero.copy()
     queue = list(Qzero)
 
     while queue:
@@ -694,10 +695,11 @@ def coAccessible(aut):
     invT = {}
     for k in T:
         n, l = k
-        if not (T[k], l) in invT:
-            invT[(T[k], l)] = {n}
-        else:
-            invT[(T[k], l)].add(n)
+        for state in T[k]:
+            if not (state, l) in invT:
+                invT[(state, l)] = {n}
+            else:
+                invT[(state, l)].add(n)
 
     visited = A.copy()
     queue = list(A)
@@ -737,9 +739,10 @@ def emonder():
     newQ = set(range(1, len(newQ) + 1))
 
     newQzero = {switch[i] for i in Qzero}
+
     automate = (newQ, sig, newT, newQzero, newA)
     listeAutomates[listAutomates.get(ACTIVE)] = automate
-
+    print(newT)
     # On remplace l'automate dans la liste
     listAutomates.delete(0, END)
     for key in listeAutomates:
