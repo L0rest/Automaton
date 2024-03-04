@@ -26,7 +26,10 @@ A1 = ({1, 2, 3}, {'a', 'b'}, {(1, 'a'): {2}, (1, 'b'): {1}, (2, 'a'): {2}, (2, '
 A2 = ({1, 2, 3, 4, 5}, {'a', 'b'},
       {(1, 'a'): {3}, (2, 'a'): {2}, (2, 'b'): {1}, (3, 'a'): {4}, (3, 'b'): {5}, (4, 'a'): {3}, (5, 'a'): {5}}, {1},
       {3})
-listeAutomates = {"A1": A1, "A2": A2}
+A3 = ({1, 2, 3, 4}, ['a', 'b'],
+      {(1, 'a'): {2, 3}, (1, 'b'): {}, (2, 'a'): {4}, (2, 'b'): {2}, (3, 'a'): {3}, (3, 'b'): {4}, (4, 'a'): {},
+       (4, 'b'): {1, 4}}, {1, 3}, {2})
+listeAutomates = {"A1": A1, "A2": A2, "A3": A3}
 
 ACTUAL_PROGRESS = []
 ACTUAL_WORD = ""
@@ -52,13 +55,7 @@ def lireMot(aut, m):
         Icop = newI
         etats.append(Icop)
 
-    valide = False
-
-    for s in Icop:
-        if s in A:
-            valide = True
-
-    return valide, etats
+    return Icop.intersection(A) is not set(), etats
 
 
 def obtenirAutomate():
@@ -690,7 +687,7 @@ def AfficherTable():
                                                                                                                   column=0,
                                                                                                                   sticky=E)
                 else:
-                    if (Q[i - 2], sig[j - 2]) in T:
+                    if (Q[i - 2], sig[j - 2]) in T and T[(Q[i - 2], sig[j - 2])]:
                         Label(fenetre, text=T[(Q[i - 2], sig[j - 2])], borderwidth=1, relief="solid",
                               font=("Helvetica", 16)).grid(row=i, column=j, sticky=NSEW)
                     else:
@@ -788,7 +785,6 @@ def coAccessible(aut):
 def emonder():
     """
     Fonction qui permet d'émonder un automate
-    @param aut:
     @return:
     """
     aut = obtenirAutomate()
@@ -816,6 +812,55 @@ def emonder():
         listAutomates.insert(END, key)
 
     messagebox.showinfo("Succès", "L'automate a bien été émondé")
+
+
+def determinise():
+    """
+    Fonction qui permet de déterminiser un automate
+    @return:
+    """
+    aut = obtenirAutomate()
+    Q, eps, T, I, A = aut
+
+    etats = [I]
+    newT = {}
+
+    for e in etats:
+        for l in eps:
+            target = set()
+            for s in e:
+                if T[(s, l)]:
+                    for i in T[(s, l)]:
+                        target.add(i)
+
+            if target:
+                if target not in etats:
+                    etats.append(target)
+                newT[(etats.index(e) + 1, l)] = etats.index(target) + 1
+
+    print("Liste des états :")
+    print(etats)
+
+    newA = set()
+
+    for i in range(len(etats)):
+        valide = False
+        for s in etats[i]:
+            if s in A:
+                valide = True
+
+        if valide:
+            newA.add(i + 1)
+
+    automate = (set(range(1, len(etats) + 1)), eps, newT, {1}, newA)
+    listeAutomates[listAutomates.get(ACTIVE)] = automate
+
+    # On remplace l'automate dans la liste
+    listAutomates.delete(0, END)
+    for key in listeAutomates:
+        listAutomates.insert(END, key)
+
+    messagebox.showinfo("Succès", "L'automate a bien été déterminisé")
 
 
 ##################################### INTERFACE #####################################
@@ -874,10 +919,15 @@ boutonEmonder = Button(root, text="Émonder l'automate", bg="lightseagreen", fon
                        command=emonder)
 boutonEmonder.grid(row=5, column=1, sticky=NSEW, padx=5, pady=5)
 
+# On crée un bouton pour déterminiser l'automate
+boutonDeter = Button(root, text="Déterminiser l'automate", bg="lightseagreen", font=("Helvetica", 12, "bold"),
+                     command=determinise)
+boutonDeter.grid(row=6, column=0, sticky=NSEW, padx=5, pady=5)
+
 # On crée un bouton pour afficher la table de transition de l'automate sélectionné
 boutonTable = Button(root, text="Afficher la table de transition", bg="lightseagreen", font=("Helvetica", 12, "bold"),
                      command=AfficherTable)
-boutonTable.grid(row=6, column=0, sticky=NS, padx=5, pady=5, columnspan=2)
+boutonTable.grid(row=6, column=1, sticky=NSEW, padx=5, pady=5, columnspan=1)
 
 # Label vide pour créer un espace entre les éléments (plus esthétique)
 Label(root, text=" ", bg="lightblue").grid(row=7, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
