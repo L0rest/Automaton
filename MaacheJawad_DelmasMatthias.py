@@ -1,3 +1,6 @@
+# Faire des box adaptées a la taille max des etats de la liste progress
+# remplacer set() par {} dans l'affichage des lectures 
+
 # Owners : Maache Jawad, Delmas Matthias
 
 # Cette application permet :
