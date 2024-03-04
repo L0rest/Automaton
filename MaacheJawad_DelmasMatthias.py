@@ -36,30 +36,29 @@ ACTUAL_RESULT = False
 ##################################### FONCTIONS #####################################
 
 
-def lireMotDeter(aut, m):
-    """
-    Fonction qui permet de lire un mot avec un automate déterministe
+def lireMot(aut, m):
+    Q, sig, T, I, A = aut
 
-    @param aut:
-    @param m:
-    @return: bool, list
-    """
-    Q, sig, T, Qzero, A = aut
-    i = 0
-    n = len(m)
-    state = next(iter(Qzero))
-    progress = list(Qzero)
+    etats = [I]
+    Icop = I.copy()
 
-    while i < n and state != 0:
-        if (state, m[i]) in T:
-            state = next(iter(T[(state, m[i])]))
-            i += 1
-        else:
-            state = 0
+    for l in m:
+        newI = set()
 
-        progress.append(state)
+        for s in Icop:
+            for t in T[(s, l)]:
+                newI.add(t)
 
-    return state in A, progress
+        Icop = newI
+        etats.append(Icop)
+
+    valide = False
+
+    for s in Icop:
+        if s in A:
+            valide = True
+
+    return valide, etats
 
 
 def obtenirAutomate():
@@ -85,7 +84,7 @@ def testerMot():
     motATester = mot.get()
 
     # On teste le mot
-    resultat, progress = lireMotDeter(automate, motATester)
+    resultat, progress = lireMot(automate, motATester)
 
     # On affiche le résultat
     if resultat:
@@ -212,7 +211,8 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, oldFen
         error_window = Toplevel(root)
         error_window.withdraw()
         error_window.attributes('-topmost', True)
-        messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états", parent=error_window)
+        messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états",
+                             parent=error_window)
         error_window.destroy()
         return
 
@@ -355,7 +355,8 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, old
         error_window = Toplevel(root)
         error_window.withdraw()
         error_window.attributes('-topmost', True)
-        messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états", parent=error_window)
+        messagebox.showerror("Erreur", "Un ou plusieurs états acceptants ne sont pas dans l'ensemble des états",
+                             parent=error_window)
         error_window.destroy()
         return
 
@@ -467,7 +468,8 @@ def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate, fenetre):
                 error_window = Toplevel(root)
                 error_window.withdraw()
                 error_window.attributes('-topmost', True)
-                messagebox.showerror("Erreur", "Un ou plusieurs états ne sont pas dans l'ensemble des états", parent=error_window)
+                messagebox.showerror("Erreur", "Un ou plusieurs états ne sont pas dans l'ensemble des états",
+                                     parent=error_window)
                 error_window.destroy()
                 return
             if i:
@@ -799,7 +801,8 @@ def emonder():
 
     switch = {list(newQ)[i]: i + 1 for i in range(len(newQ))}
     newA = {switch[i] for i in A}
-    newT = {(switch[n], l): switch[next(iter(T[(n, l)]))] for n in newQ for l in sig if ((n, l) in T and next(iter(T[(n, l)])) in newQ)}
+    newT = {(switch[n], l): switch[next(iter(T[(n, l)]))] for n in newQ for l in sig if
+            ((n, l) in T and next(iter(T[(n, l)])) in newQ)}
     newQ = set(range(1, len(newQ) + 1))
 
     newQzero = {switch[i] for i in Qzero}
