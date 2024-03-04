@@ -821,10 +821,8 @@ def determinise():
     """
     aut = obtenirAutomate()
     Q, eps, T, I, A = aut
-
     etats = [I]
     newT = {}
-
     for e in etats:
         for l in eps:
             target = set()
@@ -832,26 +830,18 @@ def determinise():
                 if T[(s, l)]:
                     for i in T[(s, l)]:
                         target.add(i)
-
             if target:
                 if target not in etats:
                     etats.append(target)
                 newT[(etats.index(e) + 1, l)] = etats.index(target) + 1
-
-    print("Liste des états :")
-    print(etats)
-
     newA = set()
-
     for i in range(len(etats)):
         valide = False
         for s in etats[i]:
             if s in A:
                 valide = True
-
         if valide:
             newA.add(i + 1)
-
     automate = (set(range(1, len(etats) + 1)), eps, newT, {1}, newA)
     listeAutomates[listAutomates.get(ACTIVE)] = automate
 
