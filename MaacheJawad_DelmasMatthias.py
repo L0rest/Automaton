@@ -27,7 +27,7 @@ A2 = ({1, 2, 3, 4, 5}, {'a', 'b'},
       {(1, 'a'): {3}, (2, 'a'): {2}, (2, 'b'): {1}, (3, 'a'): {4}, (3, 'b'): {5}, (4, 'a'): {3}, (5, 'a'): {5}}, {1},
       {3})
 A3 = ({1, 2, 3, 4}, ['a', 'b'],
-      {(1, 'a'): {2, 3}, (1, 'b'): {}, (2, 'a'): {4}, (2, 'b'): {2}, (3, 'a'): {3}, (3, 'b'): {4}, (4, 'a'): {},
+      {(1, 'a'): {2, 3, 4}, (1, 'b'): {}, (2, 'a'): {4}, (2, 'b'): {2}, (3, 'a'): {3}, (3, 'b'): {4}, (4, 'a'): {},
        (4, 'b'): {1, 4}}, {1, 3}, {2})
 listeAutomates = {"A1": A1, "A2": A2, "A3": A3}
 
@@ -46,6 +46,8 @@ def lireMot(aut, m):
     Icop = I.copy()
 
     for l in m:
+        if l not in sig:
+            return False, etats
         newI = set()
 
         for s in Icop:
@@ -55,7 +57,7 @@ def lireMot(aut, m):
         Icop = newI
         etats.append(Icop)
 
-    return Icop.intersection(A) is not set(), etats
+    return Icop.intersection(A) != set(), etats
 
 
 def obtenirAutomate():
