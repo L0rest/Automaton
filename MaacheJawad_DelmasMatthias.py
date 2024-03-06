@@ -1,6 +1,3 @@
-# Faire des box adaptées a la taille max des etats de la liste progress
-# remplacer set() par {} dans l'affichage des lectures 
-
 # Owners : Maache Jawad, Delmas Matthias
 
 # Cette application permet :
@@ -23,7 +20,7 @@ from tkinter import ttk, messagebox
 
 ##################################### VARIABLES #####################################
 
-A1 = ({1, 2, 3}, {'a', 'b'}, {(1, 'a'): {2}, (1, 'b'): {1}, (2, 'a'): {2}, (2, 'b'): {3}, (3, 'a'): {3}, (3, 'b'): {3}},
+A1 = ({1, 2, 3}, {'a', 'b'}, {(1, 'a'): {2}, (1, 'b'): {}, (2, 'a'): {2}, (2, 'b'): {3}, (3, 'a'): {3}, (3, 'b'): {3}},
       {1},
       {3})
 A2 = ({1, 2, 3, 4, 5}, {'a', 'b'},
@@ -513,18 +510,18 @@ def showChaine():
     for i in range(n * 2 + 1):
         fenetre.grid_columnconfigure(i, weight=1)
 
-    Canvas(fenetre, width=1000, height=300, bg="lightblue").grid(row=0, column=0, rowspan=3, columnspan=n * 2 + 1,
-                                                                 sticky=NSEW)
+    canvas = Canvas(fenetre, width=1000, height=300, bg="lightblue")
+    canvas.grid(row=0, column=0, rowspan=3, columnspan=n * 2 + 1, sticky=NSEW)
 
     # On affiche la progression
     Label(fenetre, text="Lecture en chaîne", font=("Helvetica", 20, ["underline", "bold"]), bg="lightblue").grid(row=0,
                                                                                                                  column=0,
                                                                                                                  sticky=N,
                                                                                                                  padx=5,
-                                                                                                                 pady=5,
+                                                                                                                 pady=10,
                                                                                                                  columnspan=n * 2 + 1)
 
-    Label(fenetre, text=str(ACTUAL_PROGRESS[0]), font=("Helvetica", 16, "bold"), bg="lightblue").grid(row=1, column=0,
+    Label(fenetre, text=str(ACTUAL_PROGRESS[0]) if ACTUAL_PROGRESS[0] else "{"+" "+"}", font=("Helvetica", 16, "bold"), bg="lightblue").grid(row=1, column=0,
                                                                                                       sticky=NSEW,
                                                                                                       padx=5, pady=5)
     for i in range(1, n):
@@ -541,7 +538,7 @@ def showChaine():
                                                                                                          sticky=NSEW,
                                                                                                          padx=5, pady=5)
         else:
-            Label(fenetre, text=str(ACTUAL_PROGRESS[i]), font=("Helvetica", 16, "bold"), bg="lightblue").grid(row=1,
+            Label(fenetre, text=str(ACTUAL_PROGRESS[i]) if ACTUAL_PROGRESS[i] else "{"+" "+"}", font=("Helvetica", 16, "bold"), bg="lightblue").grid(row=1,
                                                                                                               column=2 * i,
                                                                                                               sticky=NSEW,
                                                                                                               padx=5,
@@ -564,6 +561,7 @@ def showChaine():
                                                                                                      padx=5, pady=5)
 
 
+
 def showRuban():
     """
     Fonction qui permet d'afficher la lecture en ruban
@@ -580,7 +578,6 @@ def showRuban():
     fenetre = Toplevel(root)
     fenetre.title("Lecture en ruban")
     fenetre.geometry(str(n * 75 + 175) + "x450")
-
     canvas = Canvas(fenetre, width=n * 75 + 175, height=450, bg="lightblue")
     canvas.pack()
 
@@ -607,7 +604,7 @@ def showRuban():
 
         canvas.create_polygon(125, 225, 100, 250, 150, 250, fill="lightgray", outline="black")
         canvas.create_rectangle(100, 250, 150, 300, fill="lightgray", outline="black")
-        canvas.create_text(125, 275, text=ACTUAL_PROGRESS[0], font=("Helvetica", 16, "bold"))
+        canvas.create_text(125, 275, text=str(ACTUAL_PROGRESS[0]) if ACTUAL_PROGRESS[0] else "{"+" "+"}", font=("Helvetica", 16, "bold"))
 
         for i in range(1, state):
             if ACTUAL_PROGRESS[i] == 0:
@@ -631,12 +628,11 @@ def showRuban():
                                       fill="lightgray", outline="black")
                 canvas.create_rectangle(75 * (i + 1) + 25, 250, 75 * (i + 1) + 75, 300, fill="lightgray",
                                         outline="black")
-            canvas.create_text(75 * (i + 1) + 50, 275, text=ACTUAL_PROGRESS[i], font=("Helvetica", 16, "bold"))
+            canvas.create_text(75 * (i + 1) + 50, 275, text=str(ACTUAL_PROGRESS[i]) if ACTUAL_PROGRESS[i] else "{"+" "+"}", font=("Helvetica", 16, "bold"))
             canvas.create_rectangle(50 + 75 * i, 150, 75 * i + 125, 225, fill="lightgray", outline="black")
             canvas.create_text(75 * i + 87.5, 187.5, text=ACTUAL_WORD[i - 1], font=("Helvetica", 16, "bold"))
 
     drawRuban(state)
-
 
 def AfficherTable():
     """
