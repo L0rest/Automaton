@@ -21,15 +21,16 @@ from tkinter import ttk, messagebox
 ##################################### VARIABLES #####################################
 
 A1 = ({1, 2, 3}, {'a', 'b'}, {(1, 'a'): {2}, (1, 'b'): {}, (2, 'a'): {2}, (2, 'b'): {3}, (3, 'a'): {3}, (3, 'b'): {3}},
-      {1},
-      {3})
+      {1}, {3})
 A2 = ({1, 2, 3, 4, 5}, {'a', 'b'},
       {(1, 'a'): {3}, (2, 'a'): {2}, (2, 'b'): {1}, (3, 'a'): {4}, (3, 'b'): {5}, (4, 'a'): {3}, (5, 'a'): {5}}, {1},
       {3})
 A3 = ({1, 2, 3, 4}, ['a', 'b'],
       {(1, 'a'): {2, 3, 4}, (1, 'b'): {}, (2, 'a'): {4}, (2, 'b'): {2}, (3, 'a'): {3}, (3, 'b'): {4}, (4, 'a'): {},
        (4, 'b'): {1, 4}}, {1, 3}, {2})
-listeAutomates = {"A1": A1, "A2": A2, "A3": A3}
+A4 = ({1, 2, 3, 4}, ['a', 'b'],
+      {(1, 'a'): {2}, (2, '€'): {3}, (3, 'b'): {2}, (3, '€'): {4}, (4, 'a'): {2}, (4, 'b'): {4}}, {1}, {3})
+listeAutomates = {"A1": A1, "A2": A2, "A3": A3, "A4": A4}
 
 ACTUAL_PROGRESS = []
 ACTUAL_WORD = ""
@@ -40,24 +41,30 @@ ACTUAL_RESULT = False
 
 
 def lireMot(aut, m):
-    Q, sig, T, I, A = aut
+    etats, sig, T, init, A = aut
+    clot = {i: cloture(aut, i) for i in etats}
 
-    etats = [I]
-    Icop = I.copy()
+    states = [init]
 
     for l in m:
-        if l not in sig:
-            return False, etats
-        newI = set()
+        next_s = set()
+        for s in states[-1]:
+            cl = cloture(aut, s)
+            for c in cl:
+                if (c, l) in T and T[(c, l)]:
+                    for x in T[(c, l)]:
+                        next_s.add(x)
 
-        for s in Icop:
-            for t in T[(s, l)]:
-                newI.add(t)
+        states.append(next_s)
 
-        Icop = newI
-        etats.append(Icop)
+        if not next_s:
+            return False, states
 
-    return Icop.intersection(A) != set(), etats
+    for s in states[-1]:
+        if A.intersection(clot[s]):
+            return True, states
+
+    return False, states
 
 
 def obtenirAutomate():
@@ -803,7 +810,7 @@ def emonder():
 
     switch = {list(newQ)[i]: i + 1 for i in range(len(newQ))}
     newA = {switch[i] for i in A}
-    newT = {(switch[n], l): switch[next(iter(T[(n, l)]))] for n in newQ for l in sig if
+    newT = {(switch[n], l): {switch[next(iter(T[(n, l)]))]} for n in newQ for l in sig if
             ((n, l) in T and next(iter(T[(n, l)])) in newQ)}
     newQ = set(range(1, len(newQ) + 1))
 
@@ -845,7 +852,7 @@ def determinise():
             if target:
                 if target not in etats:
                     etats.append(target)
-                newT[(etats.index(e) + 1, l)] = etats.index(target) + 1
+                newT[(etats.index(e) + 1, l)] = {etats.index(target) + 1}
 
     newA = set()
     for i in range(len(etats)):
@@ -881,29 +888,6 @@ def cloture(aut, i):
                 res.add(n)
 
     return res
-
-
-def lireNDe(aut, m):
-    etats, sig, T, init, A = aut
-
-    states = [init]
-    accept = False
-
-    for l in m:
-        next_s = set()
-        for s in states[-1]:
-            cl = cloture(aut, s)
-            for c in cl:
-                if (c, l) in T and T[(c, l)]:
-                    for x in T[(c, l)]:
-                        next_s.add(x)
-
-        states.append(next_s)
-
-        if not next_s:
-            return False, states
-
-    return True, states
 
 
 ##################################### INTERFACE #####################################
