@@ -521,9 +521,10 @@ def showChaine():
                                                                                                                  pady=10,
                                                                                                                  columnspan=n * 2 + 1)
 
-    Label(fenetre, text=str(ACTUAL_PROGRESS[0]) if ACTUAL_PROGRESS[0] else "{"+" "+"}", font=("Helvetica", 16, "bold"), bg="lightblue").grid(row=1, column=0,
-                                                                                                      sticky=NSEW,
-                                                                                                      padx=5, pady=5)
+    Label(fenetre, text=str(ACTUAL_PROGRESS[0]) if ACTUAL_PROGRESS[0] else "{" + " " + "}",
+          font=("Helvetica", 16, "bold"), bg="lightblue").grid(row=1, column=0,
+                                                               sticky=NSEW,
+                                                               padx=5, pady=5)
     for i in range(1, n):
         Label(fenetre, text="⇒", font=("Helvetica", 30, "bold"), bg="lightblue").grid(row=1, column=2 * i - 1, padx=5,
                                                                                       pady=5)
@@ -538,11 +539,12 @@ def showChaine():
                                                                                                          sticky=NSEW,
                                                                                                          padx=5, pady=5)
         else:
-            Label(fenetre, text=str(ACTUAL_PROGRESS[i]) if ACTUAL_PROGRESS[i] else "{"+" "+"}", font=("Helvetica", 16, "bold"), bg="lightblue").grid(row=1,
-                                                                                                              column=2 * i,
-                                                                                                              sticky=NSEW,
-                                                                                                              padx=5,
-                                                                                                              pady=5)
+            Label(fenetre, text=str(ACTUAL_PROGRESS[i]) if ACTUAL_PROGRESS[i] else "{" + " " + "}",
+                  font=("Helvetica", 16, "bold"), bg="lightblue").grid(row=1,
+                                                                       column=2 * i,
+                                                                       sticky=NSEW,
+                                                                       padx=5,
+                                                                       pady=5)
 
     Label(fenetre, text="⇒", font=("Helvetica", 30, "bold"), bg="lightblue").grid(row=1, column=2 * n - 1, padx=5,
                                                                                   pady=5)
@@ -559,7 +561,6 @@ def showChaine():
                                                                                                      column=2 * n,
                                                                                                      sticky=NSEW,
                                                                                                      padx=5, pady=5)
-
 
 
 def showRuban():
@@ -604,7 +605,8 @@ def showRuban():
 
         canvas.create_polygon(125, 225, 100, 250, 150, 250, fill="lightgray", outline="black")
         canvas.create_rectangle(100, 250, 150, 300, fill="lightgray", outline="black")
-        canvas.create_text(125, 275, text=str(ACTUAL_PROGRESS[0]) if ACTUAL_PROGRESS[0] else "{"+" "+"}", font=("Helvetica", 16, "bold"))
+        canvas.create_text(125, 275, text=str(ACTUAL_PROGRESS[0]) if ACTUAL_PROGRESS[0] else "{" + " " + "}",
+                           font=("Helvetica", 16, "bold"))
 
         for i in range(1, state):
             if ACTUAL_PROGRESS[i] == 0:
@@ -628,11 +630,14 @@ def showRuban():
                                       fill="lightgray", outline="black")
                 canvas.create_rectangle(75 * (i + 1) + 25, 250, 75 * (i + 1) + 75, 300, fill="lightgray",
                                         outline="black")
-            canvas.create_text(75 * (i + 1) + 50, 275, text=str(ACTUAL_PROGRESS[i]) if ACTUAL_PROGRESS[i] else "{"+" "+"}", font=("Helvetica", 16, "bold"))
+            canvas.create_text(75 * (i + 1) + 50, 275,
+                               text=str(ACTUAL_PROGRESS[i]) if ACTUAL_PROGRESS[i] else "{" + " " + "}",
+                               font=("Helvetica", 16, "bold"))
             canvas.create_rectangle(50 + 75 * i, 150, 75 * i + 125, 225, fill="lightgray", outline="black")
             canvas.create_text(75 * i + 87.5, 187.5, text=ACTUAL_WORD[i - 1], font=("Helvetica", 16, "bold"))
 
     drawRuban(state)
+
 
 def AfficherTable():
     """
@@ -816,34 +821,39 @@ def emonder():
 
 
 def determinise():
-    """
-    Fonction qui permet de déterminiser un automate
-    @return:
-    """
     aut = obtenirAutomate()
-    Q, eps, T, I, A = aut
-    etats = [I]
+    Q, sig, T, init, A = aut
+
+    clot = {i: cloture(aut, i) for i in Q}
+
+    for s in Q:
+        if A.intersection(clot[s]) and s not in A:
+            A.add(s)
+
+    etats = [init]
     newT = {}
+
     for e in etats:
-        for l in eps:
+        for l in sig:
             target = set()
             for s in e:
-                if T[(s, l)]:
-                    for i in T[(s, l)]:
-                        target.add(i)
+                for c in clot[s]:
+                    if (c, l) in T:
+                        for next_s in T[(c, l)]:
+                            target.add(next_s)
+
             if target:
                 if target not in etats:
                     etats.append(target)
                 newT[(etats.index(e) + 1, l)] = etats.index(target) + 1
+
     newA = set()
     for i in range(len(etats)):
-        valide = False
         for s in etats[i]:
-            if s in A:
-                valide = True
-        if valide:
-            newA.add(i + 1)
-    automate = (set(range(1, len(etats) + 1)), eps, newT, {1}, newA)
+            if clot[s].intersection(A):
+                newA.add(i + 1)
+
+    automate = (set(range(1, len(etats) + 1)), sig, newT, init, newA)
     listeAutomates[listAutomates.get(ACTIVE)] = automate
 
     # On remplace l'automate dans la liste
@@ -852,6 +862,48 @@ def determinise():
         listAutomates.insert(END, key)
 
     messagebox.showinfo("Succès", "L'automate a bien été déterminisé")
+
+
+def cloture(aut, i):
+    Q, sig, T, init, A = aut
+
+    res = {i}
+    queue = [i]
+
+    while queue:
+        s = queue.pop()
+        if (s, '€') in T:
+            new_s = T[(s, '€')]
+
+            for n in new_s:
+                if not n in res:
+                    queue.append(n)
+                res.add(n)
+
+    return res
+
+
+def lireNDe(aut, m):
+    etats, sig, T, init, A = aut
+
+    states = [init]
+    accept = False
+
+    for l in m:
+        next_s = set()
+        for s in states[-1]:
+            cl = cloture(aut, s)
+            for c in cl:
+                if (c, l) in T and T[(c, l)]:
+                    for x in T[(c, l)]:
+                        next_s.add(x)
+
+        states.append(next_s)
+
+        if not next_s:
+            return False, states
+
+    return True, states
 
 
 ##################################### INTERFACE #####################################
