@@ -41,6 +41,12 @@ ACTUAL_RESULT = False
 
 
 def lireMot(aut, m):
+    """
+    Fonction qui permet de lire un mot par un automate
+    @param aut:
+    @param m:
+    @return:
+    """
     etats, sig, T, init, A = aut
     clot = {i: cloture(aut, i) for i in etats}
 
@@ -831,6 +837,10 @@ def emonder():
 
 
 def determinise():
+    """
+    Fonction qui permet de déterminiser un automate
+    @return:
+    """
     aut = obtenirAutomate()
     Q, sig, T, init, A = aut
 
@@ -875,6 +885,12 @@ def determinise():
 
 
 def cloture(aut, i):
+    """
+    Fonction qui permet de trouver la cloture d'un état
+    @param aut:
+    @param i:
+    @return:
+    """
     Q, sig, T, init, A = aut
 
     res = {i}
