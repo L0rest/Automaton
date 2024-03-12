@@ -810,8 +810,11 @@ def emonder():
 
     switch = {list(newQ)[i]: i + 1 for i in range(len(newQ))}
     newA = {switch[i] for i in A}
-    newT = {(switch[n], l): {switch[next(iter(T[(n, l)]))]} for n in newQ for l in sig if
-            ((n, l) in T and next(iter(T[(n, l)])) in newQ)}
+    newT = {}
+    for n in newQ:
+        for l in sig:
+            if (n, l) in T:
+                newT[(switch[n], l)] = {switch[i] for i in T[(n, l)]}
     newQ = set(range(1, len(newQ) + 1))
 
     newQzero = {switch[i] for i in Qzero}
