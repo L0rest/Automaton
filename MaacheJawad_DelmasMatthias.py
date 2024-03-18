@@ -909,6 +909,145 @@ def cloture(aut, i):
     return res
 
 
+def operations():
+    # On ouvre une nouvelle fenêtre pour choisir l'opération à réaliser
+    fenetre = Toplevel(root)
+    fenetre.title("Opérations sur les automates")
+    fenetre.geometry("800x600")
+
+    fenetre.grid_rowconfigure(0, weight=1)
+    fenetre.grid_rowconfigure(1, weight=1)
+    fenetre.grid_rowconfigure(2, weight=1)
+    fenetre.grid_rowconfigure(3, weight=1)
+    fenetre.grid_rowconfigure(4, weight=1)
+    fenetre.grid_columnconfigure(0, weight=1)
+    fenetre.grid_columnconfigure(1, weight=1)
+
+    canvas = Canvas(fenetre, width=400, height=300, bg="lightblue")
+    canvas.grid(row=0, column=0, rowspan=5, columnspan=2, sticky=NSEW)
+
+
+def somme(A, B):
+    Qa, sigA, Ta, initA, acceptA = A
+    Qb, sigB, Tb, initB, acceptB = B
+
+    if sigA != sigB:
+        print("Les deux alphabets doivent être définis sur le même automate")
+        return
+
+    switch = {i: i + len(Qa) for i in Qb}  # Dictionnaire pour modifier les valeurs des états de l'automate B
+    newT = {}
+
+    for transi in Ta:
+        newT[transi] = {Ta[transi]}
+
+    for (e, l) in Tb:
+        newTransi = (switch[e], l)
+
+        if newTransi in newT:
+            newT[newTransi].add(switch[Tb[(e, l)]])
+        else:
+            newT[newTransi] = {switch[Tb[(e, l)]]}
+
+    return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, {initA, switch[initB]}, acceptA.union(
+        {switch[i] for i in acceptB})
+
+
+def produit(A, B):
+    Qa, sigA, Ta, initA, acceptA = A
+    Qb, sigB, Tb, initB, acceptB = B
+
+    if sigA != sigB:
+        print("Les deux alphabets doivent être définis sur le même automate")
+        return
+
+    switch = {i: i + len(Qa) for i in Qb}  # Dictionnaire pour modifier les valeurs des états de l'automate B
+    newT = {}
+
+    for transi in Ta:
+        newT[transi] = {Ta[transi]}
+
+    for (e, l) in Tb:
+        newTransi = (switch[e], l)
+
+        if newTransi in newT:
+            newT[newTransi].add(switch[Tb[(e, l)]])
+        else:
+            newT[newTransi] = {switch[Tb[(e, l)]]}
+
+    # Ajout des €-transitions
+    for a in acceptA:
+        newT[(a, '€')] = {switch[initB]}
+
+    sigA.add('€')
+
+    return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, {
+        initA}, {switch[i] for i in acceptB}
+
+
+def plus(A):
+    Q, sig, T, init, accept = A
+
+    sig.add('€')
+    newT = {}
+
+    for transi in T:
+        newT[transi] = {T[transi]}
+
+    for a in accept:
+        newT[(a, '€')] = {init}
+
+    return Q, sig, newT, {init}, accept
+
+
+def etoile(A):
+    Q, sig, T, init, accept = A
+
+    newState = len(Q) + 1
+    newT = {}
+
+    for transi in T:
+        newT[transi] = {T[transi]}
+
+    for a in accept:
+        newT[(a, '€')] = {init}
+
+    sig.add('€')
+    Q.add(newState)
+    accept.add(newState)
+
+    return Q, sig, newT, {init, newState}, accept
+
+
+def inter(A, B):
+    Qa, sigA, Ta, initA, acceptA = A
+    Qb, sigB, Tb, initB, acceptB = B
+
+    if sigA != sigB:
+        print("Les deux alphabets doivent être définis sur le même automate")
+        return
+
+    etats = [(initA, initB)]
+    newT = {}
+    newAccept = set()
+
+    for (e1, e2) in etats:
+        # On vérifie si le couple est acceptant (i.e. les deux états du couple sont acceptants)
+        if e1 in acceptA and e2 in acceptB:
+            newAccept.add(etats.index((e1, e2)) + 1)
+
+        for l in sigA:
+            if (e1, l) in Ta and (e2, l) in Tb:
+                newS = (Ta[(e1, l)], Tb[(e2, l)])
+
+                if newS not in etats:
+                    etats.append(newS)
+
+                newT[(etats.index((e1, e2)) + 1, l)] = etats.index(newS) + 1
+
+    return set(range(1, len(etats) + 1)), sigA, newT, {1}, newAccept
+
+
 ##################################### INTERFACE #####################################
 
 # On crée la fenêtre principale
@@ -945,8 +1084,10 @@ boutonCreer = Button(root, text="Créer un automate", bg="lightseagreen", comman
                      font=("Helvetica", 14, "bold"))
 boutonCreer.grid(row=0, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
-# Label vide pour créer un espace entre les éléments (plus esthétique)
-Label(root, text=" ", bg="lightblue").grid(row=1, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
+# On crée un bouton pour réaliser des opérations sur les automates
+boutonOperations = Button(root, text="Opérations sur les automates", bg="lightseagreen", command=operations,
+                          font=("Helvetica", 14, "bold"))
+boutonOperations.grid(row=1, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
 # On crée la liste des automates
 labelAutomates = Label(root, text="Liste des automates", bg="lightblue", font=("Helvetica", 14, ["bold", "underline"]),
