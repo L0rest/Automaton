@@ -36,6 +36,9 @@ ACTUAL_PROGRESS = []
 ACTUAL_WORD = ""
 ACTUAL_RESULT = False
 
+global listAutomates1
+global listAutomates2
+
 
 ##################################### FONCTIONS #####################################
 
@@ -909,22 +912,87 @@ def cloture(aut, i):
     return res
 
 
+def obtenirAutomateOpeSimple():
+    """
+    Fonction qui permet d'obtenir l'automate sélectionné dans la liste des opérations à 1 automate
+    @return:
+    """
+    automate = listeAutomates[listAutomates1.get(ACTIVE)]
+    return automate
+
+
 def operations():
+    global listAutomates1
+    global listAutomates2
     # On ouvre une nouvelle fenêtre pour choisir l'opération à réaliser
     fenetre = Toplevel(root)
     fenetre.title("Opérations sur les automates")
-    fenetre.geometry("800x600")
+    fenetre.geometry("1000x800")
 
     fenetre.grid_rowconfigure(0, weight=1)
     fenetre.grid_rowconfigure(1, weight=1)
     fenetre.grid_rowconfigure(2, weight=1)
     fenetre.grid_rowconfigure(3, weight=1)
     fenetre.grid_rowconfigure(4, weight=1)
+    fenetre.grid_rowconfigure(5, weight=1)
+    fenetre.grid_rowconfigure(6, weight=1)
+    fenetre.grid_rowconfigure(7, weight=1)
+    fenetre.grid_rowconfigure(8, weight=1)
+    fenetre.grid_rowconfigure(9, weight=1)
     fenetre.grid_columnconfigure(0, weight=1)
     fenetre.grid_columnconfigure(1, weight=1)
+    fenetre.grid_columnconfigure(2, weight=1)
+    fenetre.grid_columnconfigure(3, weight=1)
+    fenetre.grid_columnconfigure(4, weight=1)
 
     canvas = Canvas(fenetre, width=400, height=300, bg="lightblue")
-    canvas.grid(row=0, column=0, rowspan=5, columnspan=2, sticky=NSEW)
+    canvas.grid(row=0, column=0, rowspan=10, columnspan=5, sticky=NSEW)
+
+    nomAutomate = Label(fenetre, text="Nom de l'automate", font=("Helvetica", 19, ["bold", "underline"]),
+                        bg="lightblue")
+    nomAutomate.grid(row=0, column=2, sticky=S, padx=5, pady=5)
+    nomAutomateEntry = Entry(fenetre, font=("Helvetica", 16), justify="center")
+    nomAutomateEntry.grid(row=1, column=2, sticky=N, padx=5, pady=5)
+    Label(fenetre, text=" ", bg="lightblue").grid(row=2, column=0, columnspan=5, sticky=NSEW, padx=5, pady=5)
+
+    # Partie gauche : opérations sur 1 automate (plus, étoile, complémentaire)
+    titre1 = Label(fenetre, text="Opérations sur 1 automate", font=("Helvetica", 16, ["bold", "underline"]),
+                   bg="lightblue")
+    titre1.grid(row=3, column=1, sticky=NSEW, padx=5, pady=5)
+    listAutomates1 = Listbox(fenetre, selectmode="single", exportselection=0, font=("Helvetica", 16), justify="center")
+    listAutomates1.grid(row=4, column=1, sticky=NSEW, padx=5, pady=5)
+
+    for key in listeAutomates:
+        listAutomates1.insert(END, key)
+
+    buttonPlus = Button(fenetre, text="Automate +", command=plus, bg="lightseagreen", font=("Helvetica", 13, "bold"))
+    buttonPlus.grid(row=5, column=1, sticky=NSEW, padx=5, pady=5)
+    buttonEtoile = Button(fenetre, text="Automate *", command=etoile, bg="lightseagreen",
+                          font=("Helvetica", 13, "bold"))
+    buttonEtoile.grid(row=6, column=1, sticky=NSEW, padx=5, pady=5)
+    buttonComplementaire = Button(fenetre, text="Complémentaire", bg="lightseagreen", font=("Helvetica", 13, "bold"))
+    buttonComplementaire.grid(row=7, column=1, sticky=NSEW, padx=5, pady=5)
+
+    # Partie droite : opérations sur 2 automates (somme, produit, intersection, différence)
+    titre2 = Label(fenetre, text="Opérations sur 2 automates", font=("Helvetica", 16, ["bold", "underline"]),
+                   bg="lightblue")
+    titre2.grid(row=3, column=3, sticky=NSEW, padx=5, pady=5)
+    listAutomates2 = Listbox(fenetre, selectmode="multiple", exportselection=0, font=("Helvetica", 16),
+                             justify="center")
+    listAutomates2.grid(row=4, column=3, sticky=NSEW, padx=5, pady=5)
+
+    for key in listeAutomates:
+        listAutomates2.insert(END, key)
+
+    buttonSomme = Button(fenetre, text="Somme", command=somme, bg="lightseagreen", font=("Helvetica", 13, "bold"))
+    buttonSomme.grid(row=5, column=3, sticky=NSEW, padx=5, pady=5)
+    buttonProduit = Button(fenetre, text="Produit", command=produit, bg="lightseagreen", font=("Helvetica", 13, "bold"))
+    buttonProduit.grid(row=6, column=3, sticky=NSEW, padx=5, pady=5)
+    buttonInter = Button(fenetre, text="Intersection", command=inter, bg="lightseagreen",
+                         font=("Helvetica", 13, "bold"))
+    buttonInter.grid(row=7, column=3, sticky=NSEW, padx=5, pady=5)
+    buttonDifference = Button(fenetre, text="Différence", bg="lightseagreen", font=("Helvetica", 13, "bold"))
+    buttonDifference.grid(row=8, column=3, sticky=NSEW, padx=5, pady=5)
 
 
 def somme(A, B):
@@ -985,38 +1053,50 @@ def produit(A, B):
         initA}, {switch[i] for i in acceptB}
 
 
-def plus(A):
-    Q, sig, T, init, accept = A
+def plus():
+    aut = obtenirAutomateOpeSimple()
 
-    sig.add('€')
+    Q, sig, T, init, accept = aut
+
+    newSig = sig.copy()
+    newSig.add('€')
     newT = {}
 
     for transi in T:
-        newT[transi] = {T[transi]}
+        newT[transi] = T[transi]
 
     for a in accept:
-        newT[(a, '€')] = {init}
+        newT[(a, '€')] = init
 
-    return Q, sig, newT, {init}, accept
+    print(Q, newSig, newT, init, accept)
+    return Q, sig, newT, init, accept
 
 
-def etoile(A):
-    Q, sig, T, init, accept = A
+def etoile():
+    aut = obtenirAutomateOpeSimple()
 
+    Q, sig, T, init, accept = aut
+
+    newQ = Q.copy()
+    newSig = sig.copy()
+    newAccept = accept.copy()
+    newInit = init.copy()
     newState = len(Q) + 1
     newT = {}
 
     for transi in T:
-        newT[transi] = {T[transi]}
+        newT[transi] = T[transi]
 
     for a in accept:
-        newT[(a, '€')] = {init}
+        newT[(a, '€')] = init
 
-    sig.add('€')
-    Q.add(newState)
-    accept.add(newState)
+    newSig.add('€')
+    newQ.add(newState)
+    newAccept.add(newState)
+    newInit.add(newState)
 
-    return Q, sig, newT, {init, newState}, accept
+    print(newQ, newSig, newT, newInit, newAccept)
+    return newQ, newSig, newT, newInit, newAccept
 
 
 def inter(A, B):
@@ -1053,7 +1133,9 @@ def inter(A, B):
 # On crée la fenêtre principale
 root = Tk()
 root.title("Automates")
-root.geometry("1000x600")
+root.geometry("1000x800")
+root.resizable(width=False, height=False)
+
 # On crée un grid pour la fenêtre
 root.grid_columnconfigure(0, weight=1)
 root.grid_columnconfigure(1, weight=1)
@@ -1122,7 +1204,7 @@ Label(root, text=" ", bg="lightblue").grid(row=7, column=0, sticky=NSEW, padx=5,
 # On crée une zone de texte pour taper le mot à tester
 labelMot = Label(root, text="Mot à tester", bg="lightblue", font=("Helvetica", 14, ["bold", "underline"]))
 labelMot.grid(row=8, column=0, sticky=S, padx=5, pady=5, columnspan=2)
-mot = Entry(root)
+mot = Entry(root, font=("Helvetica", 14))
 mot.grid(row=9, column=0, sticky=NSEW, padx=5, pady=5, columnspan=2)
 
 # Label vide pour créer un espace entre les éléments (plus esthétique)
