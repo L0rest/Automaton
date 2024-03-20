@@ -25,10 +25,10 @@ A1 = ({1, 2, 3}, {'a', 'b'}, {(1, 'a'): {2}, (1, 'b'): {}, (2, 'a'): {2}, (2, 'b
 A2 = ({1, 2, 3, 4, 5}, {'a', 'b'},
       {(1, 'a'): {3}, (2, 'a'): {2}, (2, 'b'): {1}, (3, 'a'): {4}, (3, 'b'): {5}, (4, 'a'): {3}, (5, 'a'): {5}}, {1},
       {3})
-A3 = ({1, 2, 3, 4}, ['a', 'b'],
+A3 = ({1, 2, 3, 4}, {'a', 'b'},
       {(1, 'a'): {2, 3, 4}, (1, 'b'): {}, (2, 'a'): {4}, (2, 'b'): {2}, (3, 'a'): {3}, (3, 'b'): {4}, (4, 'a'): {},
        (4, 'b'): {1, 4}}, {1, 3}, {2})
-A4 = ({1, 2, 3, 4}, ['a', 'b'],
+A4 = ({1, 2, 3, 4}, {'a', 'b'},
       {(1, 'a'): {2}, (2, '€'): {3}, (3, 'b'): {2}, (3, '€'): {4}, (4, 'a'): {2}, (4, 'b'): {4}}, {1}, {3})
 listeAutomates = {"A1": A1, "A2": A2, "A3": A3, "A4": A4}
 
@@ -1043,7 +1043,9 @@ def somme():
     return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, newInit, acceptA.union({switch[i] for i in acceptB})
 
 
-def produit(A, B):
+def produit():
+    A,B = obtenirAutomateOpeMulti()
+
     Qa, sigA, Ta, initA, acceptA = A
     Qb, sigB, Tb, initB, acceptB = B
 
@@ -1055,24 +1057,26 @@ def produit(A, B):
     newT = {}
 
     for transi in Ta:
-        newT[transi] = {Ta[transi]}
+        newT[transi] = Ta[transi]
 
     for (e, l) in Tb:
         newTransi = (switch[e], l)
 
         if newTransi in newT:
-            newT[newTransi].add(switch[Tb[(e, l)]])
+            for s in Tb[(e, l)]:
+                newT[newTransi].add(switch[s])
         else:
-            newT[newTransi] = switch[Tb[(e, l)]]
+            newT[newTransi] = {switch[s] for s in Tb[(e, l)]}
 
     # Ajout des €-transitions
     for a in acceptA:
-        newT[(a, '€')] = {switch[initB]}
+        for i in initB:
+            newT[(a, '€')] = {switch[i]}
 
     sigA.add('€')
 
-    return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, {
-        initA}, {switch[i] for i in acceptB}
+    print({i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, initA, {switch[i] for i in acceptB})
+    return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, initA, {switch[i] for i in acceptB}
 
 
 def plus():
