@@ -1012,8 +1012,51 @@ def operations():
     buttonDifference.grid(row=8, column=3, sticky=NSEW, padx=5, pady=5)
 
 
+def determinisePourOpe(aut):
+    """
+    Fonction qui permet de déterminiser un automate
+    @return:
+    """
+    Q, sig, T, init, A = aut
+
+    clot = {i: cloture(aut, i) for i in Q}
+
+    for s in Q:
+        if A.intersection(clot[s]) and s not in A:
+            A.add(s)
+
+    etats = [init]
+    newT = {}
+
+    for e in etats:
+        for l in sig:
+            target = set()
+            for s in e:
+                for c in clot[s]:
+                    if (c, l) in T:
+                        for next_s in T[(c, l)]:
+                            target.add(next_s)
+
+            if target:
+                if target not in etats:
+                    etats.append(target)
+                newT[(etats.index(e) + 1, l)] = {etats.index(target) + 1}
+
+    newA = set()
+    for i in range(len(etats)):
+        for s in etats[i]:
+            if clot[s].intersection(A):
+                newA.add(i + 1)
+
+    return set(range(1, len(etats) + 1)), sig, newT, init, newA
+
+
 def plus():
-    aut = obtenirAutomateOpeSimple()
+    """
+    Fonction qui permet de réaliser l'opération + sur un automate
+    @return:
+    """
+    aut = determinisePourOpe(obtenirAutomateOpeSimple())
 
     Q, sig, T, init, accept = aut
 
@@ -1032,7 +1075,11 @@ def plus():
 
 
 def etoile():
-    aut = obtenirAutomateOpeSimple()
+    """
+    Fonction qui permet de réaliser l'opération * sur un automate
+    @return:
+    """
+    aut = determinisePourOpe(obtenirAutomateOpeSimple())
 
     Q, sig, T, init, accept = aut
 
@@ -1059,7 +1106,13 @@ def etoile():
 
 
 def somme():
+    """
+    Fonction qui permet de réaliser l'opération somme sur deux automates
+    @return:
+    """
     A, B = obtenirAutomateOpeMulti()
+    A = determinisePourOpe(A)
+    B = determinisePourOpe(B)
 
     Qa, sigA, Ta, initA, acceptA = A
     Qb, sigB, Tb, initB, acceptB = B
@@ -1091,6 +1144,8 @@ def somme():
 
 def produit():
     A, B = obtenirAutomateOpeMulti()
+    A = determinisePourOpe(A)
+    B = determinisePourOpe(B)
 
     Qa, sigA, Ta, initA, acceptA = A
     Qb, sigB, Tb, initB, acceptB = B
@@ -1128,6 +1183,9 @@ def produit():
 
 def inter():
     A, B = obtenirAutomateOpeMulti()
+    A = determinisePourOpe(A)
+    B = determinisePourOpe(B)
+
     Qa, sigA, Ta, initA, acceptA = A
     Qb, sigB, Tb, initB, acceptB = B
 
