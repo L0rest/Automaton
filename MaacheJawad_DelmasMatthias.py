@@ -108,7 +108,7 @@ def testerMot():
     # On ajoute le résultat à l'historique
     HISTORY.append((name, motATester, resultat))
 
-    # Update the color of the Historique button
+    # Update de la couleur
     updateHistoriqueButton()
 
     # On affiche la progression
