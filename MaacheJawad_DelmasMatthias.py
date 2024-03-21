@@ -982,9 +982,11 @@ def operations():
     for key in listeAutomates:
         listAutomates1.insert(END, key)
 
-    buttonPlus = Button(fenetre, text="Automate +", command=plus, bg="lightseagreen", font=("Helvetica", 13, "bold"))
+    buttonPlus = Button(fenetre, text="Automate +", command=lambda: plus(nomAutomateEntry.get(), fenetre),
+                        bg="lightseagreen", font=("Helvetica", 13, "bold"))
     buttonPlus.grid(row=5, column=1, sticky=NSEW, padx=5, pady=5)
-    buttonEtoile = Button(fenetre, text="Automate *", command=etoile, bg="lightseagreen",
+    buttonEtoile = Button(fenetre, text="Automate *", command=lambda: etoile(nomAutomateEntry.get(), fenetre),
+                          bg="lightseagreen",
                           font=("Helvetica", 13, "bold"))
     buttonEtoile.grid(row=6, column=1, sticky=NSEW, padx=5, pady=5)
     buttonComplementaire = Button(fenetre, text="Complémentaire", bg="lightseagreen", font=("Helvetica", 13, "bold"))
@@ -1001,11 +1003,14 @@ def operations():
     for key in listeAutomates:
         listAutomates2.insert(END, key)
 
-    buttonSomme = Button(fenetre, text="Somme", command=somme, bg="lightseagreen", font=("Helvetica", 13, "bold"))
+    buttonSomme = Button(fenetre, text="Somme", command=lambda: somme(nomAutomateEntry.get(), fenetre),
+                         bg="lightseagreen", font=("Helvetica", 13, "bold"))
     buttonSomme.grid(row=5, column=3, sticky=NSEW, padx=5, pady=5)
-    buttonProduit = Button(fenetre, text="Produit", command=produit, bg="lightseagreen", font=("Helvetica", 13, "bold"))
+    buttonProduit = Button(fenetre, text="Produit", command=lambda: produit(nomAutomateEntry.get(), fenetre),
+                           bg="lightseagreen", font=("Helvetica", 13, "bold"))
     buttonProduit.grid(row=6, column=3, sticky=NSEW, padx=5, pady=5)
-    buttonInter = Button(fenetre, text="Intersection", command=inter, bg="lightseagreen",
+    buttonInter = Button(fenetre, text="Intersection", command=lambda: inter(nomAutomateEntry.get(), fenetre),
+                         bg="lightseagreen",
                          font=("Helvetica", 13, "bold"))
     buttonInter.grid(row=7, column=3, sticky=NSEW, padx=5, pady=5)
     buttonDifference = Button(fenetre, text="Différence", bg="lightseagreen", font=("Helvetica", 13, "bold"))
@@ -1051,11 +1056,30 @@ def determinisePourOpe(aut):
     return set(range(1, len(etats) + 1)), sig, newT, init, newA
 
 
-def plus():
+def plus(nomAutomate, fenetre):
     """
     Fonction qui permet de réaliser l'opération + sur un automate
+    @param nomAutomate:
+    @param fenetre:
     @return:
     """
+
+    if not nomAutomate:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Veuillez entrer un nom pour l'automate", parent=error_window)
+        error_window.destroy()
+        return
+
+    if nomAutomate in listeAutomates:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un automate avec ce nom existe déjà", parent=error_window)
+        error_window.destroy()
+        return
+
     aut = determinisePourOpe(obtenirAutomateOpeSimple())
 
     Q, sig, T, init, accept = aut
@@ -1070,15 +1094,39 @@ def plus():
     for a in accept:
         newT[(a, '€')] = init
 
-    print(Q, newSig, newT, init, accept)
-    return Q, sig, newT, init, accept
+    newAut = (Q, newSig, newT, init, accept)
+
+    listeAutomates[nomAutomate] = newAut
+    listAutomates.insert(END, nomAutomate)
+    fenetre.destroy()
+
+    messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
-def etoile():
+def etoile(nomAutomate, fenetre):
     """
     Fonction qui permet de réaliser l'opération * sur un automate
+    @param nomAutomate:
+    @param fenetre:
     @return:
     """
+
+    if not nomAutomate:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Veuillez entrer un nom pour l'automate", parent=error_window)
+        error_window.destroy()
+        return
+
+    if nomAutomate in listeAutomates:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un automate avec ce nom existe déjà", parent=error_window)
+        error_window.destroy()
+        return
+
     aut = determinisePourOpe(obtenirAutomateOpeSimple())
 
     Q, sig, T, init, accept = aut
@@ -1101,16 +1149,46 @@ def etoile():
     newAccept.add(newState)
     newInit.add(newState)
 
-    print(newQ, newSig, newT, newInit, newAccept)
-    return newQ, newSig, newT, newInit, newAccept
+    newAut = (newQ, newSig, newT, newInit, newAccept)
+
+    listeAutomates[nomAutomate] = newAut
+    listAutomates.insert(END, nomAutomate)
+    fenetre.destroy()
+
+    messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
-def somme():
+def somme(nomAutomate, fenetre):
     """
     Fonction qui permet de réaliser l'opération somme sur deux automates
     @return:
     """
-    A, B = obtenirAutomateOpeMulti()
+    if not nomAutomate:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Veuillez entrer un nom pour l'automate", parent=error_window)
+        error_window.destroy()
+        return
+
+    if nomAutomate in listeAutomates:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un automate avec ce nom existe déjà", parent=error_window)
+        error_window.destroy()
+        return
+
+    try:
+        A, B = obtenirAutomateOpeMulti()
+    except TypeError:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Veuillez sélectionner exactement deux automates", parent=error_window)
+        error_window.destroy()
+        return
+
     A = determinisePourOpe(A)
     B = determinisePourOpe(B)
 
@@ -1118,7 +1196,12 @@ def somme():
     Qb, sigB, Tb, initB, acceptB = B
 
     if sigA != sigB:
-        print("Les deux alphabets doivent être définis sur le même automate")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Les deux automates doivent être définis sur le même alphabet",
+                             parent=error_window)
+        error_window.destroy()
         return
 
     switch = {i: i + len(Qa) for i in Qb}  # Dictionnaire pour modifier les valeurs des états de l'automate B
@@ -1138,12 +1221,49 @@ def somme():
 
     newInit = initA.union({switch[i] for i in initB})
 
-    print({i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, newInit, acceptA.union({switch[i] for i in acceptB}))
-    return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, newInit, acceptA.union({switch[i] for i in acceptB})
+    newAut = (
+    {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, newInit, acceptA.union({switch[i] for i in acceptB}))
+
+    listeAutomates[nomAutomate] = newAut
+    listAutomates.insert(END, nomAutomate)
+    fenetre.destroy()
+
+    messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
-def produit():
-    A, B = obtenirAutomateOpeMulti()
+def produit(nomAutomate, fenetre):
+    """
+    Fonction qui permet de réaliser l'opération produit sur deux automates
+    @param nomAutomate:
+    @param fenetre:
+    @return:
+    """
+    if not nomAutomate:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Veuillez entrer un nom pour l'automate", parent=error_window)
+        error_window.destroy()
+        return
+
+    if nomAutomate in listeAutomates:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un automate avec ce nom existe déjà", parent=error_window)
+        error_window.destroy()
+        return
+
+    try:
+        A, B = obtenirAutomateOpeMulti()
+    except TypeError:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Veuillez sélectionner exactement deux automates", parent=error_window)
+        error_window.destroy()
+        return
+
     A = determinisePourOpe(A)
     B = determinisePourOpe(B)
 
@@ -1151,7 +1271,12 @@ def produit():
     Qb, sigB, Tb, initB, acceptB = B
 
     if sigA != sigB:
-        print("Les deux alphabets doivent être définis sur le même automate")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Les deux automates doivent être définis sur le même alphabet",
+                             parent=error_window)
+        error_window.destroy()
         return
 
     switch = {i: i + len(Qa) for i in Qb}  # Dictionnaire pour modifier les valeurs des états de l'automate B
@@ -1177,12 +1302,48 @@ def produit():
     newSig = sigA.copy()
     newSig.add('€')
 
-    print({i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, initA, {switch[i] for i in acceptB})
-    return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, initA, {switch[i] for i in acceptB}
+    newAut = ({i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, initA, {switch[i] for i in acceptB})
+
+    listeAutomates[nomAutomate] = newAut
+    listAutomates.insert(END, nomAutomate)
+    fenetre.destroy()
+
+    messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
-def inter():
-    A, B = obtenirAutomateOpeMulti()
+def inter(nomAutomate, fenetre):
+    """
+    Fonction qui permet de réaliser l'opération intersection sur deux automates
+    @param nomAutomate:
+    @param fenetre:
+    @return:
+    """
+    if not nomAutomate:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Veuillez entrer un nom pour l'automate", parent=error_window)
+        error_window.destroy()
+        return
+
+    if nomAutomate in listeAutomates:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un automate avec ce nom existe déjà", parent=error_window)
+        error_window.destroy()
+        return
+
+    try:
+        A, B = obtenirAutomateOpeMulti()
+    except TypeError:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Veuillez sélectionner exactement deux automates", parent=error_window)
+        error_window.destroy()
+        return
+
     A = determinisePourOpe(A)
     B = determinisePourOpe(B)
 
@@ -1190,7 +1351,12 @@ def inter():
     Qb, sigB, Tb, initB, acceptB = B
 
     if sigA != sigB:
-        print("Les deux alphabets doivent être définis sur le même automate")
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Les deux automates doivent être définis sur le même alphabet",
+                             parent=error_window)
+        error_window.destroy()
         return
 
     etats = [(next(iter(initA)), next(iter(initB)))]  # next(iter()) permet de récupérer le premier élément du set
@@ -1214,8 +1380,13 @@ def inter():
 
                 newT[(etats.index((e1, e2)) + 1, l)] = etats.index(newS) + 1
 
-    print(set(range(1, len(etats) + 1)), sigA, newT, {1}, newAccept)
-    return set(range(1, len(etats) + 1)), sigA, newT, {1}, newAccept
+    newAut = (set(range(1, len(etats) + 1)), sigA, newT, {1}, newAccept)
+
+    listeAutomates[nomAutomate] = newAut
+    listAutomates.insert(END, nomAutomate)
+    fenetre.destroy()
+
+    messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
 ##################################### INTERFACE #####################################
