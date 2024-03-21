@@ -927,7 +927,7 @@ def obtenirAutomateOpeMulti():
     @return:
     """
     select = listAutomates2.curselection()
-    
+
     if len(select) != 2:
         # Faire les popups pour notifier qu'il y'a trop ou pas assez d'automates sélectionnés
         return
@@ -935,9 +935,9 @@ def obtenirAutomateOpeMulti():
     A = listeAutomates[listAutomates2.get(select[0])]
     B = listeAutomates[listAutomates2.get(select[1])]
 
-    return A,B
+    return A, B
 
-    
+
 def operations():
     global listAutomates1
     global listAutomates2
@@ -1012,73 +1012,6 @@ def operations():
     buttonDifference.grid(row=8, column=3, sticky=NSEW, padx=5, pady=5)
 
 
-def somme():
-    A,B = obtenirAutomateOpeMulti()
-    
-    Qa, sigA, Ta, initA, acceptA = A
-    Qb, sigB, Tb, initB, acceptB = B
-            
-    if sigA != sigB:
-        print("Les deux alphabets doivent être définis sur le même automate")
-        return
-            
-    switch = {i: i + len(Qa) for i in Qb}  # Dictionnaire pour modifier les valeurs des états de l'automate B
-    newT = {}
-
-    for transi in Ta:
-        newT[transi] = Ta[transi]
-    
-    for (e, l) in Tb:
-        newTransi = (switch[e], l)
-    
-        if newTransi in newT:
-            for s in Tb[(e,l)]:
-                newT[newTransi].add(switch[s])
-        else:
-            newT[newTransi] = {switch[s] for s in Tb[(e, l)]}
-
-    newInit = initA.union({switch[i] for i in initB})
-    
-    print({i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, newInit, acceptA.union({switch[i] for i in acceptB}))
-    return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, newInit, acceptA.union({switch[i] for i in acceptB})
-
-
-def produit():
-    A,B = obtenirAutomateOpeMulti()
-
-    Qa, sigA, Ta, initA, acceptA = A
-    Qb, sigB, Tb, initB, acceptB = B
-
-    if sigA != sigB:
-        print("Les deux alphabets doivent être définis sur le même automate")
-        return
-
-    switch = {i: i + len(Qa) for i in Qb}  # Dictionnaire pour modifier les valeurs des états de l'automate B
-    newT = {}
-
-    for transi in Ta:
-        newT[transi] = Ta[transi]
-
-    for (e, l) in Tb:
-        newTransi = (switch[e], l)
-
-        if newTransi in newT:
-            for s in Tb[(e, l)]:
-                newT[newTransi].add(switch[s])
-        else:
-            newT[newTransi] = {switch[s] for s in Tb[(e, l)]}
-
-    # Ajout des €-transitions
-    for a in acceptA:
-        for i in initB:
-            newT[(a, '€')] = {switch[i]}
-
-    sigA.add('€')
-
-    print({i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, initA, {switch[i] for i in acceptB})
-    return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, initA, {switch[i] for i in acceptB}
-
-
 def plus():
     aut = obtenirAutomateOpeSimple()
 
@@ -1125,7 +1058,9 @@ def etoile():
     return newQ, newSig, newT, newInit, newAccept
 
 
-def inter(A, B):
+def somme():
+    A, B = obtenirAutomateOpeMulti()
+
     Qa, sigA, Ta, initA, acceptA = A
     Qb, sigB, Tb, initB, acceptB = B
 
@@ -1133,7 +1068,74 @@ def inter(A, B):
         print("Les deux alphabets doivent être définis sur le même automate")
         return
 
-    etats = [(initA, initB)]
+    switch = {i: i + len(Qa) for i in Qb}  # Dictionnaire pour modifier les valeurs des états de l'automate B
+    newT = {}
+
+    for transi in Ta:
+        newT[transi] = Ta[transi]
+
+    for (e, l) in Tb:
+        newTransi = (switch[e], l)
+
+        if newTransi in newT:
+            for s in Tb[(e, l)]:
+                newT[newTransi].add(switch[s])
+        else:
+            newT[newTransi] = {switch[s] for s in Tb[(e, l)]}
+
+    newInit = initA.union({switch[i] for i in initB})
+
+    print({i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, newInit, acceptA.union({switch[i] for i in acceptB}))
+    return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, newInit, acceptA.union({switch[i] for i in acceptB})
+
+
+def produit():
+    A, B = obtenirAutomateOpeMulti()
+
+    Qa, sigA, Ta, initA, acceptA = A
+    Qb, sigB, Tb, initB, acceptB = B
+
+    if sigA != sigB:
+        print("Les deux alphabets doivent être définis sur le même automate")
+        return
+
+    switch = {i: i + len(Qa) for i in Qb}  # Dictionnaire pour modifier les valeurs des états de l'automate B
+    newT = {}
+
+    for transi in Ta:
+        newT[transi] = Ta[transi]
+
+    for (e, l) in Tb:
+        newTransi = (switch[e], l)
+
+        if newTransi in newT:
+            for s in Tb[(e, l)]:
+                newT[newTransi].add(switch[s])
+        else:
+            newT[newTransi] = {switch[s] for s in Tb[(e, l)]}
+
+    # Ajout des €-transitions
+    for a in acceptA:
+        for i in initB:
+            newT[(a, '€')] = {switch[i]}
+
+    newSig = sigA.copy()
+    newSig.add('€')
+
+    print({i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, initA, {switch[i] for i in acceptB})
+    return {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, initA, {switch[i] for i in acceptB}
+
+
+def inter():
+    A, B = obtenirAutomateOpeMulti()
+    Qa, sigA, Ta, initA, acceptA = A
+    Qb, sigB, Tb, initB, acceptB = B
+
+    if sigA != sigB:
+        print("Les deux alphabets doivent être définis sur le même automate")
+        return
+
+    etats = [(next(iter(initA)), next(iter(initB)))]  # next(iter()) permet de récupérer le premier élément du set
     newT = {}
     newAccept = set()
 
@@ -1144,13 +1146,17 @@ def inter(A, B):
 
         for l in sigA:
             if (e1, l) in Ta and (e2, l) in Tb:
-                newS = (Ta[(e1, l)], Tb[(e2, l)])
+                newE1 = next(iter(Ta[(e1, l)]))
+                newE2 = next(iter(Tb[(e2, l)]))
+
+                newS = (newE1, newE2)
 
                 if newS not in etats:
                     etats.append(newS)
 
                 newT[(etats.index((e1, e2)) + 1, l)] = etats.index(newS) + 1
 
+    print(set(range(1, len(etats) + 1)), sigA, newT, {1}, newAccept)
     return set(range(1, len(etats) + 1)), sigA, newT, {1}, newAccept
 
 
