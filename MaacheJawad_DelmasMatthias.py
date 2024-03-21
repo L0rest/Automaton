@@ -35,7 +35,7 @@ listeAutomates = {"A1": A1, "A2": A2, "A3": A3, "A4": A4}
 ACTUAL_PROGRESS = []
 ACTUAL_WORD = ""
 ACTUAL_RESULT = False
-
+HISTORY = []
 global listAutomates1
 global listAutomates2
 
@@ -85,15 +85,13 @@ def obtenirAutomate():
 
 
 def testerMot():
-    """
-    Fonction qui permet de tester un mot avec un automate
-    @return:
-    """
     global ACTUAL_PROGRESS
     global ACTUAL_WORD
     global ACTUAL_RESULT
+    global HISTORY
     # On récupère l'automate sélectionné
     automate = obtenirAutomate()
+    name= listAutomates.get(ACTIVE)
 
     # On récupère le mot à tester
     motATester = mot.get()
@@ -107,13 +105,18 @@ def testerMot():
     else:
         resLabel.config(text="Le mot n'est pas accepté", fg="red")
 
+    # On ajoute le résultat à l'historique
+    HISTORY.append((name, motATester, resultat))
+
+    # Update the color of the Historique button
+    updateHistoriqueButton()
+
     # On affiche la progression
     ACTUAL_PROGRESS = progress
     ACTUAL_WORD = motATester
     ACTUAL_RESULT = resultat
     boutonChaine.grid(row=5, column=2, sticky=S, padx=5, pady=5, columnspan=3)
     boutonRuban.grid(row=6, column=2, sticky=N, padx=5, pady=5, columnspan=3)
-
 
 def creerAutomate():
     """
@@ -1389,6 +1392,38 @@ def inter(nomAutomate, fenetre):
     messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
+def historique():
+    if not HISTORY:
+        messagebox.showinfo("Erreur", "L'historique est vide.")
+        return
+    history_window = Toplevel(root)
+    history_window.title("Historique")
+    style = ttk.Style()
+    style.configure("Treeview.Heading", font=('Helvetica', 14))
+    style.configure("Treeview", font=('Helvetica', 13))
+    tree = ttk.Treeview(history_window, columns=('Automate', 'Mot', 'Resultat'), show='headings')
+    tree.heading('Automate', text='Automate', anchor='center')
+    tree.heading('Mot', text='Mot', anchor='center')
+    tree.heading('Resultat', text='Resultat', anchor='center')
+    tree.column('Automate', anchor='center')
+    tree.column('Mot', anchor='center')
+    tree.column('Resultat', anchor='center')
+    tree.pack()
+    for aut, mot, resultat in HISTORY:
+        color = "green" if resultat else "red"
+        result_text = "✔" if resultat else "❌"
+        tree.insert('', 'end', values=(aut, mot, result_text), tags=(color,))
+    tree.tag_configure("green", foreground="green")
+    tree.tag_configure("red", foreground="red")
+
+def updateHistoriqueButton():
+    if not HISTORY:
+        #Trouver une bonne couleur
+        boutonHistorique.config(bg="#A52A2A")
+    else:
+        boutonHistorique.config(bg="lightseagreen")
+
+
 ##################################### INTERFACE #####################################
 
 # On crée la fenêtre principale
@@ -1494,6 +1529,13 @@ boutonChaine = Button(root, text="Voir la lecture en chaîne", width=20, command
 boutonRuban = Button(root, text="Voir la lecture en ruban", width=20, command=showRuban, bg="darkgoldenrod2",
                      font=("Helvetica", 12, "bold"))
 
+# On crée un bouton pour afficher l'historique des lectures
+boutonHistorique = Button(root, text="Historique", command=historique, bg="lightseagreen", font=("Helvetica", 14, "bold"))
+boutonHistorique.grid(row=11, column=2, sticky=NSEW, padx=5, pady=5, columnspan=3)
+
+# On met à jour la couleur du bouton historique
+updateHistoriqueButton()
+
 ##################################### MAIN #####################################
 
 if __name__ == '__main__':
@@ -1503,3 +1545,4 @@ if __name__ == '__main__':
 
     # On lance la fenêtre principale
     root.mainloop()
+
