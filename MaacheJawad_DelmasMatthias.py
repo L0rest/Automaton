@@ -1393,9 +1393,6 @@ def inter(nomAutomate, fenetre):
 
 
 def historique():
-    if not HISTORY:
-        messagebox.showinfo("Erreur", "L'historique est vide.")
-        return
     history_window = Toplevel(root)
     history_window.title("Historique")
     style = ttk.Style()
@@ -1418,10 +1415,9 @@ def historique():
 
 def updateHistoriqueButton():
     if not HISTORY:
-        #Trouver une bonne couleur
-        boutonHistorique.config(bg="#A52A2A")
+        boutonHistorique.config(state='disabled')
     else:
-        boutonHistorique.config(bg="lightseagreen")
+        boutonHistorique.config(state='normal')
 
 
 ##################################### INTERFACE #####################################
@@ -1530,7 +1526,7 @@ boutonRuban = Button(root, text="Voir la lecture en ruban", width=20, command=sh
                      font=("Helvetica", 12, "bold"))
 
 # On crée un bouton pour afficher l'historique des lectures
-boutonHistorique = Button(root, text="Historique", command=historique, bg="lightseagreen", font=("Helvetica", 14, "bold"))
+boutonHistorique = Button(root, text="Historique", command=historique, bg="#808A87", font=("Helvetica", 14, "bold"))
 boutonHistorique.grid(row=11, column=2, sticky=NSEW, padx=5, pady=5, columnspan=3)
 
 # On met à jour la couleur du bouton historique
