@@ -1429,7 +1429,9 @@ def complementaire(aut):
 
 def compl(nomAutomate, fenetre):
     """
-    Fonction qui permet de complémenter un automate
+    Fonction qui permet de créer un nouvel automate complémentaire
+    @param nomAutomate:
+    @param fenetre:
     @return:
     """
     if not nomAutomate:
@@ -1506,6 +1508,10 @@ def diff(nomAutomate, fenetre):
 
 
 def historique():
+    """
+    Fonction qui permet d'afficher l'historique des opérations
+    @return:
+    """
     history_window = Toplevel(root)
     history_window.title("Historique")
     style = ttk.Style()
@@ -1528,6 +1534,10 @@ def historique():
 
 
 def updateHistoriqueButton():
+    """
+    Fonction qui permet de mettre à jour le bouton "Historique"
+    @return:
+    """
     if not HISTORY:
         boutonHistorique.config(state='disabled')
     else:
