@@ -91,7 +91,7 @@ def testerMot():
     global HISTORY
     # On récupère l'automate sélectionné
     automate = obtenirAutomate()
-    name= listAutomates.get(ACTIVE)
+    name = listAutomates.get(ACTIVE)
 
     # On récupère le mot à tester
     motATester = mot.get()
@@ -117,6 +117,7 @@ def testerMot():
     ACTUAL_RESULT = resultat
     boutonChaine.grid(row=5, column=2, sticky=S, padx=5, pady=5, columnspan=3)
     boutonRuban.grid(row=6, column=2, sticky=N, padx=5, pady=5, columnspan=3)
+
 
 def creerAutomate():
     """
@@ -729,12 +730,12 @@ def complet():
     automate = obtenirAutomate()
     Q, sig, T, Qzero, A = automate
 
-    if len(T) < len(Q) * len(sig):
+    if any((n, l) not in T or not T[(n, l)] for n in Q for l in sig):  # Si l'automate n'est pas complet
         Q.add(len(Q) + 1)
 
     for n in Q:
         for l in sig:
-            if not (n, l) in T:
+            if not (n, l) in T or not T[(n, l)]:
                 T[(n, l)] = {len(Q)}
 
     automate = (Q, sig, T, Qzero, A)
@@ -992,7 +993,9 @@ def operations():
                           bg="lightseagreen",
                           font=("Helvetica", 13, "bold"))
     buttonEtoile.grid(row=6, column=1, sticky=NSEW, padx=5, pady=5)
-    buttonComplementaire = Button(fenetre, text="Complémentaire", bg="lightseagreen", font=("Helvetica", 13, "bold"))
+    buttonComplementaire = Button(fenetre, text="Complémentaire",
+                                  command=lambda: compl(nomAutomateEntry.get(), fenetre), bg="lightseagreen",
+                                  font=("Helvetica", 13, "bold"))
     buttonComplementaire.grid(row=7, column=1, sticky=NSEW, padx=5, pady=5)
 
     # Partie droite : opérations sur 2 automates (somme, produit, intersection, différence)
@@ -1016,7 +1019,8 @@ def operations():
                          bg="lightseagreen",
                          font=("Helvetica", 13, "bold"))
     buttonInter.grid(row=7, column=3, sticky=NSEW, padx=5, pady=5)
-    buttonDifference = Button(fenetre, text="Différence", bg="lightseagreen", font=("Helvetica", 13, "bold"))
+    buttonDifference = Button(fenetre, text="Différence", command=lambda: diff(nomAutomateEntry.get(), fenetre),
+                              bg="lightseagreen", font=("Helvetica", 13, "bold"))
     buttonDifference.grid(row=8, column=3, sticky=NSEW, padx=5, pady=5)
 
 
@@ -1225,7 +1229,7 @@ def somme(nomAutomate, fenetre):
     newInit = initA.union({switch[i] for i in initB})
 
     newAut = (
-    {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, newInit, acceptA.union({switch[i] for i in acceptB}))
+        {i + 1 for i in range(len(Qa) + len(Qb))}, sigA, newT, newInit, acceptA.union({switch[i] for i in acceptB}))
 
     listeAutomates[nomAutomate] = newAut
     listAutomates.insert(END, nomAutomate)
@@ -1314,6 +1318,45 @@ def produit(nomAutomate, fenetre):
     messagebox.showinfo("Succès", "L'automate a bien été créé")
 
 
+def intersection(A, B):
+    Qa, sigA, Ta, initA, acceptA = A
+    Qb, sigB, Tb, initB, acceptB = B
+
+    if sigA != sigB:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Les deux automates doivent être définis sur le même alphabet",
+                             parent=error_window)
+        error_window.destroy()
+        return
+
+    etats = [(next(iter(initA)), next(iter(initB)))]  # next(iter()) permet de récupérer le premier élément du set
+    newT = {}
+    newAccept = set()
+
+    for (e1, e2) in etats:
+        # On vérifie si le couple est acceptant (i.e. les deux états du couple sont acceptants)
+        if e1 in acceptA and e2 in acceptB:
+            newAccept.add(etats.index((e1, e2)) + 1)
+
+        for l in sigA:
+            if (e1, l) in Ta and (e2, l) in Tb:
+                newE1 = next(iter(Ta[(e1, l)]))
+                newE2 = next(iter(Tb[(e2, l)]))
+
+                newS = (newE1, newE2)
+
+                if newS not in etats:
+                    etats.append(newS)
+
+                newT[(etats.index((e1, e2)) + 1, l)] = etats.index(newS) + 1
+
+    newAut = (set(range(1, len(etats) + 1)), sigA, newT, {1}, newAccept)
+
+    return newAut
+
+
 def inter(nomAutomate, fenetre):
     """
     Fonction qui permet de réaliser l'opération intersection sur deux automates
@@ -1350,40 +1393,110 @@ def inter(nomAutomate, fenetre):
     A = determinisePourOpe(A)
     B = determinisePourOpe(B)
 
-    Qa, sigA, Ta, initA, acceptA = A
-    Qb, sigB, Tb, initB, acceptB = B
+    newAut = intersection(A, B)
 
-    if sigA != sigB:
+    listeAutomates[nomAutomate] = newAut
+    listAutomates.insert(END, nomAutomate)
+    fenetre.destroy()
+
+    messagebox.showinfo("Succès", "L'automate a bien été créé")
+
+
+def complementaire(aut):
+    """
+    Fonction qui permet de trouver l'automate complémentaire
+    @param aut:
+    @return:
+    """
+    Q, sig, T, Qzero, A = aut
+
+    # On complète d'abord l'automate
+    newQ = Q.copy()
+    if any((n, l) not in T or not T[(n, l)] for n in Q for l in sig):  # Si l'automate n'est pas complet
+        newQ.add(len(newQ) + 1)
+
+    newT = T.copy()
+    for e in newQ:
+        for l in sig:
+            if not (e, l) in T or not T[(e, l)]:  # Si l'état n'a pas de transition pour la lettre l
+                newT[(e, l)] = {len(newQ)}
+
+    # On inverse les états acceptants et non acceptants
+    newA = newQ - A
+
+    return newQ, sig, newT, Qzero, newA
+
+
+def compl(nomAutomate, fenetre):
+    """
+    Fonction qui permet de complémenter un automate
+    @return:
+    """
+    if not nomAutomate:
         error_window = Toplevel(root)
         error_window.withdraw()
         error_window.attributes('-topmost', True)
-        messagebox.showerror("Erreur", "Les deux automates doivent être définis sur le même alphabet",
-                             parent=error_window)
+        messagebox.showerror("Erreur", "Veuillez entrer un nom pour l'automate", parent=error_window)
         error_window.destroy()
         return
 
-    etats = [(next(iter(initA)), next(iter(initB)))]  # next(iter()) permet de récupérer le premier élément du set
-    newT = {}
-    newAccept = set()
+    if nomAutomate in listeAutomates:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un automate avec ce nom existe déjà", parent=error_window)
+        error_window.destroy()
+        return
 
-    for (e1, e2) in etats:
-        # On vérifie si le couple est acceptant (i.e. les deux états du couple sont acceptants)
-        if e1 in acceptA and e2 in acceptB:
-            newAccept.add(etats.index((e1, e2)) + 1)
+    aut = obtenirAutomateOpeSimple()
+    newAut = complementaire(aut)
 
-        for l in sigA:
-            if (e1, l) in Ta and (e2, l) in Tb:
-                newE1 = next(iter(Ta[(e1, l)]))
-                newE2 = next(iter(Tb[(e2, l)]))
+    listeAutomates[nomAutomate] = newAut
+    listAutomates.insert(END, nomAutomate)
+    fenetre.destroy()
 
-                newS = (newE1, newE2)
+    messagebox.showinfo("Succès", "L'automate a bien été créé")
 
-                if newS not in etats:
-                    etats.append(newS)
 
-                newT[(etats.index((e1, e2)) + 1, l)] = etats.index(newS) + 1
+def diff(nomAutomate, fenetre):
+    """
+    Fonction qui permet de réaliser l'opération différence sur deux automates
+    @param nomAutomate:
+    @param fenetre:
+    @return:
+    """
+    if not nomAutomate:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Veuillez entrer un nom pour l'automate", parent=error_window)
+        error_window.destroy()
+        return
 
-    newAut = (set(range(1, len(etats) + 1)), sigA, newT, {1}, newAccept)
+    if nomAutomate in listeAutomates:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Un automate avec ce nom existe déjà", parent=error_window)
+        error_window.destroy()
+        return
+
+    try:
+        A, B = obtenirAutomateOpeMulti()
+    except TypeError:
+        error_window = Toplevel(root)
+        error_window.withdraw()
+        error_window.attributes('-topmost', True)
+        messagebox.showerror("Erreur", "Veuillez sélectionner exactement deux automates", parent=error_window)
+        error_window.destroy()
+        return
+
+    A = determinisePourOpe(A)
+    B = determinisePourOpe(B)
+
+    newB = complementaire(B)
+
+    newAut = intersection(A, newB)
 
     listeAutomates[nomAutomate] = newAut
     listAutomates.insert(END, nomAutomate)
@@ -1413,6 +1526,7 @@ def historique():
     tree.tag_configure("green", foreground="green")
     tree.tag_configure("red", foreground="red")
 
+
 def updateHistoriqueButton():
     if not HISTORY:
         boutonHistorique.config(state='disabled')
@@ -1425,7 +1539,7 @@ def updateHistoriqueButton():
 # On crée la fenêtre principale
 root = Tk()
 root.title("Automates")
-root.geometry("1000x800")
+root.geometry("1000x600")
 root.resizable(width=False, height=False)
 
 # On crée un grid pour la fenêtre
@@ -1541,4 +1655,3 @@ if __name__ == '__main__':
 
     # On lance la fenêtre principale
     root.mainloop()
-
