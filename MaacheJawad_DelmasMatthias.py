@@ -1,16 +1,12 @@
 # Owners : Maache Jawad, Delmas Matthias
 
 # Cette application permet :
-# - La lecture DETERMINISTE d'un mot par un automate
-# - La création d'un automate (AFN ou AFD, complet ou incomplet)
-# - La visualisation de la table de transition
-# - La complétion/émondage d'un automate
-# - La visualisation de la lecture en chaîne / ruban
-
-# Afin de faciliter la prise en charge des automates déterministes et non déterministes, nous avons choisi de
-# représenter les valeurs de la table de transition par des ensembles. Ainsi, pour un automate déterministe, chaque
-# valeur de la table de transition est un ensemble à un seul élément, tandis que pour un automate non déterministe,
-# chaque valeur est un ensemble de plusieurs éléments.
+# - de tester un mot sur un automate (AFD ou AFN)
+# - de créer un automate (AFD ou AFN)
+# - d'afficher la table de transition d'un automate
+# - d'effectuer des opérations sur des automates (union, intersection, complémentaire, plus, étoile)
+# - de compléter, émonder, déterminiser un automate
+# - de sauvegarder les lectures de mots dans un historique
 
 ############################################################################################################
 
@@ -1549,7 +1545,7 @@ def updateHistoriqueButton():
 # On crée la fenêtre principale
 root = Tk()
 root.title("Automates")
-root.geometry("1000x600")
+root.geometry("1000x700")
 root.resizable(width=False, height=False)
 
 # On crée un grid pour la fenêtre
