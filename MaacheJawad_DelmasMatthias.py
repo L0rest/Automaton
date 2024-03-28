@@ -821,7 +821,7 @@ def emonder():
     Fonction qui permet d'émonder un automate
     @return:
     """
-    aut = obtenirAutomate()
+    aut = determinisePourOpe(obtenirAutomate())
     Q, sig, T, Qzero, A = aut
 
     acc = accessible(aut)
@@ -831,19 +831,20 @@ def emonder():
 
     if not newQ:
         automate = (set(), sig, {}, set(), set())
+    else:
+        switch = {list(newQ)[i]: i + 1 for i in range(len(newQ))}
+        newA = {switch[i] for i in A}
+        newT = {}
+        for n in newQ:
+            for l in sig:
+                if (n, l) in T and T[(n, l)]:
+                    newT[(switch[n], l)] = {switch[i] for i in T[(n, l)] if i in newQ}
+        newQ = set(range(1, len(newQ) + 1))
 
-    switch = {list(newQ)[i]: i + 1 for i in range(len(newQ))}
-    newA = {switch[i] for i in A}
-    newT = {}
-    for n in newQ:
-        for l in sig:
-            if (n, l) in T and T[(n, l)]:
-                newT[(switch[n], l)] = {switch[i] for i in T[(n, l)] if i in newQ}
-    newQ = set(range(1, len(newQ) + 1))
+        newQzero = {switch[i] for i in Qzero}
 
-    newQzero = {switch[i] for i in Qzero}
+        automate = (newQ, sig, newT, newQzero, newA)
 
-    automate = (newQ, sig, newT, newQzero, newA)
     listeAutomates[listAutomates.get(ACTIVE)] = automate
 
     # On remplace l'automate dans la liste
@@ -888,13 +889,10 @@ def determinise():
     Q, sig, T, init, A = aut
 
     clot = {i: cloture(aut, i) for i in Q}
-    print(clot)
 
     for s in Q:
         if A.intersection(clot[s]):
             A.add(s)
-
-    print(A)
 
     etats = [init]
     newT = {}
@@ -1048,7 +1046,7 @@ def determinisePourOpe(aut):
     clot = {i: cloture(aut, i) for i in Q}
 
     for s in Q:
-        if A.intersection(clot[s]) and s not in A:
+        if A.intersection(clot[s]):
             A.add(s)
 
     etats = [init]
