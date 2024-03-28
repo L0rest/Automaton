@@ -25,7 +25,7 @@ A3 = ({1, 2, 3, 4}, {'a', 'b'},
       {(1, 'a'): {2, 3, 4}, (1, 'b'): {}, (2, 'a'): {4}, (2, 'b'): {2}, (3, 'a'): {3}, (3, 'b'): {4}, (4, 'a'): {},
        (4, 'b'): {1, 4}}, {1, 3}, {2})
 A4 = ({1, 2, 3, 4}, {'a', 'b'},
-      {(1, 'a'): {2}, (2, '€'): {3}, (3, 'b'): {2}, (3, '€'): {4}, (4, 'a'): {2}, (4, 'b'): {4}}, {1}, {3})
+      {(1, 'a'): {2}, (2, '€'): {3}, (3, 'b'): {2}, (3, '€'): {4}, (4, 'a'): {4}, (4, '€'): {2}}, {1}, {3})
 listeAutomates = {"A1": A1, "A2": A2, "A3": A3, "A4": A4}
 
 ACTUAL_PROGRESS = []
@@ -193,6 +193,7 @@ def creerAutomate():
 def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, oldFenetre):
     """
     Fonction qui permet de créer un tableau pour un automate déterministe
+    @param oldFenetre:
     @param nbEtats:
     @param alphabet:
     @param etatsAcceptants:
@@ -303,6 +304,7 @@ def creerTableauDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, oldFen
 def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate, fenetre):
     """
     Fonction qui permet de valider le tableau de transition pour un automate déterministe
+    @param fenetre:
     @param Q:
     @param sig:
     @param T:
@@ -337,6 +339,7 @@ def validerTableauDeter(Q, sig, T, Qzero, A, d, nomAutomate, fenetre):
 def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, oldFenetre):
     """
     Fonction qui permet de créer un tableau pour un automate non déterministe
+    @param oldFenetre:
     @param nbEtats:
     @param alphabet:
     @param etatsAcceptants:
@@ -449,6 +452,7 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, old
 def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate, fenetre):
     """
     Fonction qui permet de valider le tableau de transition pour un automate non déterministe
+    @param fenetre:
     @param Q:
     @param sig:
     @param T:
@@ -662,9 +666,16 @@ def AfficherTable():
     """
     automate = obtenirAutomate()
     Q, sig, T, Qzero, A = automate
-    Q, sig = sorted(list(Q)), sorted(list(sig))
-    n = len(Q)
-    m = len(sig)
+    Qcop, sigCop = sorted(list(Q)), sorted(list(sig))
+
+    # Si la table de transition contient une epsilon transition alors on ajoute '€' à l'alphabet
+    for k in T:
+        if k[1] == "€":
+            sigCop = sigCop + ["€"]
+            break
+
+    n = len(Qcop)
+    m = len(sigCop)
 
     # On crée une nouvelle fenêtre
     fenetre = Toplevel(root)
@@ -693,24 +704,25 @@ def AfficherTable():
                     Label(fenetre, text="Q \ Σ", borderwidth=1, relief="solid",
                           font=("Helvetica", 16, "bold")).grid(row=i, column=j, sticky=NSEW)
                 else:
-                    Label(fenetre, text=sig[j - 2], borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
+                    Label(fenetre, text=sigCop[j - 2], borderwidth=1, relief="solid",
+                          font=("Helvetica", 16, "bold")).grid(
                         row=i, column=j, sticky=NSEW)
             else:
                 if j == 1:
-                    if Q[i - 2] in A:
-                        Label(fenetre, text=Q[i - 2], borderwidth=1, relief="solid", font=("Helvetica", 16, "bold"),
+                    if Qcop[i - 2] in A:
+                        Label(fenetre, text=Qcop[i - 2], borderwidth=1, relief="solid", font=("Helvetica", 16, "bold"),
                               bg="darkolivegreen1").grid(row=i, column=j, sticky=NSEW)
                     else:
-                        Label(fenetre, text=Q[i - 2], borderwidth=1, relief="solid",
+                        Label(fenetre, text=Qcop[i - 2], borderwidth=1, relief="solid",
                               font=("Helvetica", 16, "bold")).grid(row=i, column=j, sticky=NSEW)
 
-                    if Q[i - 2] in Qzero:
+                    if Qcop[i - 2] in Qzero:
                         Label(fenetre, text="⇒", font=("Helvetica", 30, "bold"), bg="lightblue", fg="cyan4").grid(row=i,
                                                                                                                   column=0,
                                                                                                                   sticky=E)
                 else:
-                    if (Q[i - 2], sig[j - 2]) in T and T[(Q[i - 2], sig[j - 2])]:
-                        Label(fenetre, text=T[(Q[i - 2], sig[j - 2])], borderwidth=1, relief="solid",
+                    if (Qcop[i - 2], sigCop[j - 2]) in T and T[(Qcop[i - 2], sigCop[j - 2])]:
+                        Label(fenetre, text=T[(Qcop[i - 2], sigCop[j - 2])], borderwidth=1, relief="solid",
                               font=("Helvetica", 16)).grid(row=i, column=j, sticky=NSEW)
                     else:
                         Label(fenetre, text="❌", fg="red", borderwidth=1, relief="solid",
@@ -815,15 +827,18 @@ def emonder():
     acc = accessible(aut)
     coAcc = coAccessible(aut)
 
-    newQ = {i for i in acc if i in coAcc}
+    newQ = acc.intersection(coAcc)
+
+    if not newQ:
+        automate = (set(), sig, {}, set(), set())
 
     switch = {list(newQ)[i]: i + 1 for i in range(len(newQ))}
     newA = {switch[i] for i in A}
     newT = {}
     for n in newQ:
         for l in sig:
-            if (n, l) in T:
-                newT[(switch[n], l)] = {switch[i] for i in T[(n, l)]}
+            if (n, l) in T and T[(n, l)]:
+                newT[(switch[n], l)] = {switch[i] for i in T[(n, l)] if i in newQ}
     newQ = set(range(1, len(newQ) + 1))
 
     newQzero = {switch[i] for i in Qzero}
@@ -839,6 +854,31 @@ def emonder():
     messagebox.showinfo("Succès", "L'automate a bien été émondé")
 
 
+def cloture(aut, i):
+    """
+    Fonction qui permet de trouver la cloture d'un état
+    @param aut:
+    @param i:
+    @return:
+    """
+    Q, sig, T, init, A = aut
+
+    res = {i}
+    queue = [i]
+
+    while queue:
+        s = queue.pop()
+        if (s, '€') in T:
+            new_s = T[(s, '€')]
+
+            for n in new_s:
+                if not n in res:
+                    queue.append(n)
+                res.add(n)
+
+    return res
+
+
 def determinise():
     """
     Fonction qui permet de déterminiser un automate
@@ -848,10 +888,13 @@ def determinise():
     Q, sig, T, init, A = aut
 
     clot = {i: cloture(aut, i) for i in Q}
+    print(clot)
 
     for s in Q:
-        if A.intersection(clot[s]) and s not in A:
+        if A.intersection(clot[s]):
             A.add(s)
+
+    print(A)
 
     etats = [init]
     newT = {}
@@ -885,31 +928,6 @@ def determinise():
         listAutomates.insert(END, key)
 
     messagebox.showinfo("Succès", "L'automate a bien été déterminisé")
-
-
-def cloture(aut, i):
-    """
-    Fonction qui permet de trouver la cloture d'un état
-    @param aut:
-    @param i:
-    @return:
-    """
-    Q, sig, T, init, A = aut
-
-    res = {i}
-    queue = [i]
-
-    while queue:
-        s = queue.pop()
-        if (s, '€') in T:
-            new_s = T[(s, '€')]
-
-            for n in new_s:
-                if not n in res:
-                    queue.append(n)
-                res.add(n)
-
-    return res
 
 
 def obtenirAutomateOpeSimple():
