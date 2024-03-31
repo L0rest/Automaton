@@ -391,40 +391,44 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, old
 
     for i in range(n + 4):
         fenetre.grid_rowconfigure(i, weight=1)
-    for j in range(m + 3):
+    for j in range(m + 4):
         fenetre.grid_columnconfigure(j, weight=1)
 
     canvas = Canvas(fenetre, width=1200, height=900, bg="lightblue")
-    canvas.grid(row=0, column=0, rowspan=n + 5, columnspan=m + 3, sticky=NSEW)
+    canvas.grid(row=0, column=0, rowspan=n + 5, columnspan=m + 4, sticky=NSEW)
 
     # On insère les éléments dans la fenêtre
     Label(fenetre, text="Table de transition", font=("Helvetica", 20, ["bold", "underline"]), bg="lightblue").grid(
         row=0, column=0,
         sticky=N, padx=5,
         pady=10,
-        columnspan=m + 3)
+        columnspan=m + 4)
 
     Label(fenetre, text="État initial", font=("Helvetica", 15, "bold"), bg="lightblue").grid(row=0, column=0,
                                                                                              sticky=S, padx=5,
-                                                                                             pady=5, columnspan=m + 3)
+                                                                                             pady=5, columnspan=m + 4)
 
     statesList = Listbox(fenetre, selectmode="multiple", exportselection=0, width=10, height=min(4, n),
                          font=("Helvetica", 14),
                          justify="center")
-    statesList.grid(row=1, column=0, sticky=N, padx=5, pady=5, columnspan=m + 3)
+    statesList.grid(row=1, column=0, sticky=N, padx=5, pady=5, columnspan=m + 4)
 
     for i in Q:
         statesList.insert(END, i)
 
     for i in range(1, n + 2):
-        for j in range(1, m + 2):
+        for j in range(1, m + 3):
             if i == 1:
                 if j == 1:
                     Label(fenetre, text="Q \ Σ", borderwidth=1, relief="solid",
                           font=("Helvetica", 16, "bold")).grid(row=i + 1, column=j, sticky=NSEW)
-                else:
+                elif j < m + 2:
                     Label(fenetre, text=sig[j - 2], borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
                         row=i + 1, column=j, sticky=NSEW)
+                else:
+                    Label(fenetre, text="ε", borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(row=i + 1,
+                                                                                                              column=j,
+                                                                                                              sticky=NSEW)
             else:
                 if j == 1:
                     if list(Q)[i - 2] in A:
@@ -435,18 +439,22 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, old
                         Label(fenetre, text=list(Q)[i - 2], borderwidth=1, relief="solid",
                               font=("Helvetica", 16, "bold")).grid(row=i + 1, column=j, sticky=NSEW)
 
-                else:
+                elif j < m + 2:
                     d["{0},{1}".format(list(Q)[i - 2], sig[j - 2])] = Entry(fenetre, width=10, justify="center",
                                                                             font=("Helvetica", 16), borderwidth=1,
                                                                             relief="solid")
                     d["{0},{1}".format(list(Q)[i - 2], sig[j - 2])].grid(row=i + 1, column=j, sticky=NSEW)
+                else:
+                    d["{0},{1}".format(list(Q)[i - 2], "€")] = Entry(fenetre, width=10, justify="center",
+                                                                     font=("Helvetica", 16), borderwidth=1, relief="solid")
+                    d["{0},{1}".format(list(Q)[i - 2], "€")].grid(row=i + 1, column=j, sticky=NSEW)
 
     Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
 
     Button(fenetre, text="Valider",
            command=lambda: validerTableauNonDeter(Q, sig, T, statesList, A, d, v, nomAutomate, fenetre),
            bg="lightseagreen", font=("Helvetica", 16, "bold")).grid(row=n + 4, column=0, sticky=NSEW, padx=5, pady=5,
-                                                                    columnspan=m + 3)
+                                                                    columnspan=m + 4)
 
 
 def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate, fenetre):
@@ -476,7 +484,7 @@ def validerTableauNonDeter(Q, sig, T, Qzero, A, d, v, nomAutomate, fenetre):
     for key, value in d.items():
         valueSet = set()
         for i in value.get().split(","):
-            if v == "Complet" and not i:
+            if v == "Complet" and not i and key.split(",")[1] != "€":
                 error_window = Toplevel(root)
                 error_window.withdraw()
                 error_window.attributes('-topmost', True)
@@ -704,7 +712,7 @@ def AfficherTable():
                     Label(fenetre, text="Q \ Σ", borderwidth=1, relief="solid",
                           font=("Helvetica", 16, "bold")).grid(row=i, column=j, sticky=NSEW)
                 else:
-                    Label(fenetre, text=sigCop[j - 2], borderwidth=1, relief="solid",
+                    Label(fenetre, text=sigCop[j - 2] if sigCop[j - 2] != "€" else "ε", borderwidth=1, relief="solid",
                           font=("Helvetica", 16, "bold")).grid(
                         row=i, column=j, sticky=NSEW)
             else:
