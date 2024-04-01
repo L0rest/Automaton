@@ -426,9 +426,10 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, old
                     Label(fenetre, text=sig[j - 2], borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
                         row=i + 1, column=j, sticky=NSEW)
                 else:
-                    Label(fenetre, text="ε", borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(row=i + 1,
-                                                                                                              column=j,
-                                                                                                              sticky=NSEW)
+                    Label(fenetre, text="ε", borderwidth=1, relief="solid", font=("Helvetica", 16, "bold")).grid(
+                        row=i + 1,
+                        column=j,
+                        sticky=NSEW)
             else:
                 if j == 1:
                     if list(Q)[i - 2] in A:
@@ -446,7 +447,8 @@ def creerTableauNonDeter(nbEtats, alphabet, etatsAcceptants, v, nomAutomate, old
                     d["{0},{1}".format(list(Q)[i - 2], sig[j - 2])].grid(row=i + 1, column=j, sticky=NSEW)
                 else:
                     d["{0},{1}".format(list(Q)[i - 2], "€")] = Entry(fenetre, width=10, justify="center",
-                                                                     font=("Helvetica", 16), borderwidth=1, relief="solid")
+                                                                     font=("Helvetica", 16), borderwidth=1,
+                                                                     relief="solid")
                     d["{0},{1}".format(list(Q)[i - 2], "€")].grid(row=i + 1, column=j, sticky=NSEW)
 
     Label(fenetre, text=" ", bg="lightblue").grid(row=n + 3, column=0, sticky=NSEW, padx=5, pady=5, columnspan=m + 3)
@@ -951,10 +953,6 @@ def obtenirAutomateOpeMulti():
     @return:
     """
     select = listAutomates2.curselection()
-
-    if len(select) != 2:
-        # Faire les popups pour notifier qu'il y'a trop ou pas assez d'automates sélectionnés
-        return
 
     A = listeAutomates[listAutomates2.get(select[0])]
     B = listeAutomates[listAutomates2.get(select[1])]
